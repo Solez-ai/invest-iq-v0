@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Watchlist } from '@/components/Watchlist';
 import { Diary } from '@/components/Diary';
 import { Settings } from '@/components/Settings';
 import { News } from '@/components/News';
+import { AssetComparison } from '@/components/AssetComparison';
 import { AIAssistant } from '@/components/AIAssistant';
 import { CurrencyProvider } from '@/hooks/useCurrency';
 
@@ -23,6 +25,8 @@ const Index = () => {
         return <Watchlist />;
       case 'news':
         return <News />;
+      case 'compare':
+        return <AssetComparison />;
       case 'diary':
         return <Diary />;
       case 'settings':
