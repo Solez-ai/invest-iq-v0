@@ -117,7 +117,7 @@ export const Dashboard = () => {
               type={key}
               showAll={true}
               quotes={quotes}
-              isRealTime={is RealTimeEnabled}
+              isRealTime={isRealTimeEnabled}
             />
           </TabsContent>
         ))}
