@@ -33,6 +33,7 @@ export const useRealTimeUpdates = ({
 
   useEffect(() => {
     const handleLiveUpdatesChange = (event: CustomEvent) => {
+      console.log('Live updates setting changed:', event.detail);
       setLiveUpdatesEnabled(event.detail);
     };
 
@@ -118,13 +119,17 @@ export const useRealTimeUpdates = ({
     }
   }, [symbols, fetchQuotes]);
 
-  // Set up real-time polling
+  // Set up real-time polling - this is the key fix
   useEffect(() => {
+    // Clear any existing interval first
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
 
-    if (enabled && liveUpdatesEnabled && symbols.length > 0) {
+    const shouldStartPolling = enabled && liveUpdatesEnabled && symbols.length > 0;
+    
+    if (shouldStartPolling) {
       intervalRef.current = setInterval(() => {
         fetchQuotes(symbols);
       }, interval);
@@ -134,9 +139,11 @@ export const useRealTimeUpdates = ({
       console.log('Real-time updates disabled');
     }
 
+    // Cleanup function
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, [enabled, liveUpdatesEnabled, symbols, interval, fetchQuotes]);
@@ -147,6 +154,7 @@ export const useRealTimeUpdates = ({
       mountedRef.current = false;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, []);
