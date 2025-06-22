@@ -20,11 +20,31 @@ export const StockCard = ({ symbol, companyName, assetType, onClick, quote: exte
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [priceChanged, setPriceChanged] = useState<'up' | 'down' | null>(null);
+  const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(() => {
+    return localStorage.getItem('liveUpdates') === 'true';
+  });
   const { currencySymbol } = useCurrency();
+
+  // Listen for live updates setting changes
+  useEffect(() => {
+    const handleLiveUpdatesChange = (event: CustomEvent) => {
+      console.log('StockCard: Live updates setting changed to:', event.detail);
+      setLiveUpdatesEnabled(event.detail);
+      // Clear any price change animations when disabled
+      if (!event.detail) {
+        setPriceChanged(null);
+      }
+    };
+
+    window.addEventListener('liveUpdatesChanged', handleLiveUpdatesChange as EventListener);
+    return () => {
+      window.removeEventListener('liveUpdatesChanged', handleLiveUpdatesChange as EventListener);
+    };
+  }, []);
 
   // Use external quote if provided (for real-time updates)
   useEffect(() => {
-    if (externalQuote) {
+    if (externalQuote && liveUpdatesEnabled) {
       const oldPrice = quote?.c;
       const newPrice = externalQuote.c;
       
@@ -35,11 +55,18 @@ export const StockCard = ({ symbol, companyName, assetType, onClick, quote: exte
       
       setQuote(externalQuote);
       setLoading(false);
+    } else if (externalQuote && !liveUpdatesEnabled) {
+      // Update quote but don't animate when live updates are disabled
+      setQuote(externalQuote);
+      setLoading(false);
+      setPriceChanged(null);
     }
-  }, [externalQuote, quote?.c]);
+  }, [externalQuote, quote?.c, liveUpdatesEnabled]);
 
-  // Listen for price change events
+  // Listen for price change events only when live updates are enabled
   useEffect(() => {
+    if (!liveUpdatesEnabled) return;
+
     const handlePriceChange = (event: CustomEvent) => {
       if (event.detail.symbol === symbol) {
         setPriceChanged(event.detail.newPrice > event.detail.oldPrice ? 'up' : 'down');
@@ -51,7 +78,7 @@ export const StockCard = ({ symbol, companyName, assetType, onClick, quote: exte
     return () => {
       window.removeEventListener('priceChanged', handlePriceChange as EventListener);
     };
-  }, [symbol]);
+  }, [symbol, liveUpdatesEnabled]);
 
   useEffect(() => {
     const fetchQuote = async () => {
@@ -78,13 +105,7 @@ export const StockCard = ({ symbol, companyName, assetType, onClick, quote: exte
     };
 
     fetchQuote();
-    
-    // Only set up auto-refresh if not using real-time updates
-    if (!isRealTime && !externalQuote) {
-      const interval = setInterval(fetchQuote, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [symbol, externalQuote, isRealTime]);
+  }, [symbol, externalQuote]);
 
   const getAssetIcon = () => {
     if (assetType === 'us') return '🇺🇸';
@@ -143,13 +164,14 @@ export const StockCard = ({ symbol, companyName, assetType, onClick, quote: exte
       className={cn(
         "glass-card p-4 cursor-pointer transition-all duration-200 hover:scale-105 relative",
         glowClass,
-        priceChanged === 'up' && "animate-pulse bg-green-500/10 border-green-500/30",
-        priceChanged === 'down' && "animate-pulse bg-red-500/10 border-red-500/30"
+        // Only apply price change animations when live updates are enabled
+        liveUpdatesEnabled && priceChanged === 'up' && "animate-pulse bg-green-500/10 border-green-500/30",
+        liveUpdatesEnabled && priceChanged === 'down' && "animate-pulse bg-red-500/10 border-red-500/30"
       )}
       onClick={onClick}
     >
-      {/* Real-time indicator */}
-      {isRealTime && (
+      {/* Real-time indicator - only show when both isRealTime and liveUpdatesEnabled */}
+      {isRealTime && liveUpdatesEnabled && (
         <div className="absolute top-1 left-1">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
         </div>
@@ -214,8 +236,9 @@ export const StockCard = ({ symbol, companyName, assetType, onClick, quote: exte
           <div className="flex justify-between items-center">
             <span className={cn(
               "text-2xl font-bold text-foreground transition-colors duration-500",
-              priceChanged === 'up' && "text-green-500",
-              priceChanged === 'down' && "text-red-500"
+              // Only apply price change colors when live updates are enabled
+              liveUpdatesEnabled && priceChanged === 'up' && "text-green-500",
+              liveUpdatesEnabled && priceChanged === 'down' && "text-red-500"
             )}>
               {currencySymbol}{quote.c.toFixed(2)}
             </span>

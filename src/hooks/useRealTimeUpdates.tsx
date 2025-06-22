@@ -33,7 +33,7 @@ export const useRealTimeUpdates = ({
 
   useEffect(() => {
     const handleLiveUpdatesChange = (event: CustomEvent) => {
-      console.log('Live updates setting changed:', event.detail);
+      console.log('useRealTimeUpdates: Live updates setting changed to:', event.detail);
       setLiveUpdatesEnabled(event.detail);
     };
 
@@ -44,7 +44,10 @@ export const useRealTimeUpdates = ({
   }, []);
 
   const fetchQuotes = useCallback(async (symbolsToFetch: string[]) => {
-    if (!symbolsToFetch.length || !mountedRef.current) return;
+    if (!symbolsToFetch.length || !mountedRef.current || !liveUpdatesEnabled) {
+      console.log('useRealTimeUpdates: Skipping fetch - disabled or no symbols');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -82,17 +85,18 @@ export const useRealTimeUpdates = ({
         }
       }
 
-      if (mountedRef.current) {
+      if (mountedRef.current && liveUpdatesEnabled) {
         setQuotes(prevQuotes => {
           const newQuotes = { ...prevQuotes, ...allQuotes };
           
-          // Trigger visual updates for changed prices
+          // Only trigger visual updates if live updates are enabled
           Object.keys(allQuotes).forEach(symbol => {
             const oldQuote = prevQuotes[symbol];
             const newQuote = allQuotes[symbol];
             
             if (oldQuote && newQuote && oldQuote.c !== newQuote.c) {
-              // Dispatch price change event for visual feedback
+              // Dispatch price change event for visual feedback only if live updates enabled
+              console.log(`Price changed for ${symbol}: ${oldQuote.c} -> ${newQuote.c}`);
               window.dispatchEvent(new CustomEvent('priceChanged', {
                 detail: { symbol, oldPrice: oldQuote.c, newPrice: newQuote.c }
               }));
@@ -110,16 +114,16 @@ export const useRealTimeUpdates = ({
         setLoading(false);
       }
     }
-  }, []);
+  }, [liveUpdatesEnabled]);
 
   // Initial fetch
   useEffect(() => {
-    if (symbols.length > 0) {
+    if (symbols.length > 0 && liveUpdatesEnabled) {
       fetchQuotes(symbols);
     }
-  }, [symbols, fetchQuotes]);
+  }, [symbols, fetchQuotes, liveUpdatesEnabled]);
 
-  // Set up real-time polling - this is the key fix
+  // Set up real-time polling
   useEffect(() => {
     // Clear any existing interval first
     if (intervalRef.current) {
@@ -130,13 +134,12 @@ export const useRealTimeUpdates = ({
     const shouldStartPolling = enabled && liveUpdatesEnabled && symbols.length > 0;
     
     if (shouldStartPolling) {
+      console.log(`Real-time updates started for ${symbols.length} symbols (${interval/1000}s interval)`);
       intervalRef.current = setInterval(() => {
         fetchQuotes(symbols);
       }, interval);
-
-      console.log(`Real-time updates started for ${symbols.length} symbols (${interval/1000}s interval)`);
     } else {
-      console.log('Real-time updates disabled');
+      console.log('Real-time updates stopped - Live updates disabled or no symbols');
     }
 
     // Cleanup function
@@ -160,10 +163,10 @@ export const useRealTimeUpdates = ({
   }, []);
 
   const refreshNow = useCallback(() => {
-    if (symbols.length > 0) {
+    if (symbols.length > 0 && liveUpdatesEnabled) {
       fetchQuotes(symbols);
     }
-  }, [symbols, fetchQuotes]);
+  }, [symbols, fetchQuotes, liveUpdatesEnabled]);
 
   return {
     quotes,

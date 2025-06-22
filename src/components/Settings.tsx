@@ -13,7 +13,6 @@ export const Settings = () => {
   });
   const { currency, setCurrency } = useCurrency();
   const [notifications, setNotifications] = useState(true);
-  const [autoRefresh, setAutoRefresh] = useState(true);
   const [liveUpdates, setLiveUpdates] = useState(() => {
     return localStorage.getItem('liveUpdates') === 'true';
   });
@@ -34,6 +33,7 @@ export const Settings = () => {
   }, [isDarkMode]);
 
   const handleLiveUpdatesChange = (enabled: boolean) => {
+    console.log('Settings: Changing live updates to:', enabled);
     setLiveUpdates(enabled);
     localStorage.setItem('liveUpdates', enabled.toString());
     // Dispatch custom event to notify other components
@@ -103,17 +103,6 @@ export const Settings = () => {
             <Switch 
               checked={liveUpdates} 
               onCheckedChange={handleLiveUpdatesChange}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="text-sm font-medium text-foreground">Auto-refresh Data</label>
-              <p className="text-xs text-muted-foreground">Automatically update prices every 30 seconds</p>
-            </div>
-            <Switch 
-              checked={autoRefresh} 
-              onCheckedChange={setAutoRefresh}
             />
           </div>
         </div>
