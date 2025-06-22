@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ export const AIAssistant = ({ isOpen, onClose }: AIAssistantProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hi! I'm your AI investment assistant. I can analyze real-time market data and help you make informed investment decisions. Ask me about stocks, market trends, or any investment questions!",
+      content: "Hi! I'm your AI investment assistant. I can analyze real-time market data across US stocks, global markets, ETFs, and cryptocurrencies. Ask me about specific assets, market trends, or portfolio strategies!",
       role: 'assistant',
       timestamp: new Date(),
     }
@@ -40,18 +39,27 @@ export const AIAssistant = ({ isOpen, onClose }: AIAssistantProps) => {
   }, [messages]);
 
   const enhancePromptWithMarketData = async (userMessage: string): Promise<string> => {
-    // Extract stock symbols from the message
-    const stockSymbols = userMessage.match(/\b[A-Z]{1,5}\b/g) || [];
-    const commonStocks = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'NVDA'];
+    // Extract stock symbols from the message (including global and crypto formats)
+    const stockSymbols = userMessage.match(/\b([A-Z]{1,5}|[A-Z]+:[A-Z]+|BINANCE:[A-Z]+)\b/g) || [];
+    const commonAssets = {
+      us: ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'NVDA'],
+      global: ['NS:RELIANCE', 'NS:TCS', 'TSE:7203'],
+      etfs: ['SPY', 'QQQ', 'VTI', 'GLD'],
+      crypto: ['BINANCE:BTCUSDT', 'BINANCE:ETHUSDT', 'BINANCE:ADAUSDT']
+    };
     
     let marketData = '';
     
-    // If specific stocks mentioned, get their data
+    // If specific assets mentioned, get their data
     if (stockSymbols.length > 0) {
-      for (const symbol of stockSymbols.slice(0, 3)) { // Limit to 3 stocks
+      for (const symbol of stockSymbols.slice(0, 5)) { // Limit to 5 assets
         try {
           const quote = finnhubAPI.getMockQuote(symbol);
-          marketData += `\n${symbol} Current Data:
+          const assetType = symbol.includes('BINANCE:') ? 'Crypto' : 
+                          symbol.includes(':') ? 'Global Stock' :
+                          ['SPY', 'QQQ', 'VTI', 'GLD', 'TLT'].includes(symbol) ? 'ETF' : 'US Stock';
+          
+          marketData += `\n${symbol} (${assetType}) Current Data:
 - Price: $${quote.c.toFixed(2)}
 - Change: ${quote.d >= 0 ? '+' : ''}${quote.d.toFixed(2)} (${quote.dp.toFixed(2)}%)
 - High: $${quote.h.toFixed(2)}, Low: $${quote.l.toFixed(2)}
@@ -61,8 +69,31 @@ export const AIAssistant = ({ isOpen, onClose }: AIAssistantProps) => {
         }
       }
     } else if (userMessage.toLowerCase().includes('market') || userMessage.toLowerCase().includes('today')) {
-      // General market inquiry - provide data for major stocks
-      for (const symbol of commonStocks.slice(0, 3)) {
+      // General market inquiry - provide data across asset types
+      const sampleAssets = [
+        ...commonAssets.us.slice(0, 2),
+        ...commonAssets.global.slice(0, 1),
+        ...commonAssets.etfs.slice(0, 1),
+        ...commonAssets.crypto.slice(0, 1)
+      ];
+      
+      for (const symbol of sampleAssets) {
+        const quote = finnhubAPI.getMockQuote(symbol);
+        const assetType = symbol.includes('BINANCE:') ? 'Crypto' : 
+                        symbol.includes(':') ? 'Global' :
+                        ['SPY', 'QQQ', 'VTI', 'GLD'].includes(symbol) ? 'ETF' : 'US';
+        
+        marketData += `\n${symbol} (${assetType}): $${quote.c.toFixed(2)} (${quote.dp >= 0 ? '+' : ''}${quote.dp.toFixed(2)}%)`;
+      }
+    } else if (userMessage.toLowerCase().includes('crypto')) {
+      // Crypto-specific inquiry
+      for (const symbol of commonAssets.crypto.slice(0, 3)) {
+        const quote = finnhubAPI.getMockQuote(symbol);
+        marketData += `\n${symbol.replace('BINANCE:', '')}: $${quote.c.toFixed(2)} (${quote.dp >= 0 ? '+' : ''}${quote.dp.toFixed(2)}%)`;
+      }
+    } else if (userMessage.toLowerCase().includes('etf')) {
+      // ETF-specific inquiry
+      for (const symbol of commonAssets.etfs.slice(0, 3)) {
         const quote = finnhubAPI.getMockQuote(symbol);
         marketData += `\n${symbol}: $${quote.c.toFixed(2)} (${quote.dp >= 0 ? '+' : ''}${quote.dp.toFixed(2)}%)`;
       }
@@ -72,7 +103,7 @@ export const AIAssistant = ({ isOpen, onClose }: AIAssistantProps) => {
 
 User Question: ${userMessage}
 
-Please provide investment advice based on the real-time data above. Be specific and actionable while emphasizing risk management.`;
+Please provide investment advice based on the real-time data above. Consider different asset classes (US stocks, global stocks, ETFs, crypto) and emphasize risk management and diversification.`;
   };
 
   const handleSend = async () => {
@@ -227,7 +258,7 @@ Please provide investment advice based on the real-time data above. Be specific 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask about stocks, market trends, or investment advice..."
+            placeholder="Ask about specific assets, market trends, or investment advice..."
             className="bg-white/10 border-white/20 text-white placeholder-white/60"
             disabled={isLoading}
           />
