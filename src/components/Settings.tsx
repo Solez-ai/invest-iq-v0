@@ -1,8 +1,6 @@
 
 import { useState } from 'react';
-import { Moon, Sun, Globe, DollarSign, Bell, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Moon, Sun, Globe, DollarSign, Bell } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 export const Settings = () => {
@@ -10,19 +8,6 @@ export const Settings = () => {
   const [currency, setCurrency] = useState('USD');
   const [notifications, setNotifications] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [finnhubKey, setFinnhubKey] = useState('');
-  const [openRouterKey, setOpenRouterKey] = useState('');
-
-  const handleSaveApiKeys = () => {
-    if (finnhubKey) {
-      localStorage.setItem('finnhub-api-key', finnhubKey);
-    }
-    if (openRouterKey) {
-      localStorage.setItem('openrouter-api-key', openRouterKey);
-    }
-    // In a real app, you'd also update the API utilities here
-    alert('API keys saved! Please refresh the page for changes to take effect.');
-  };
 
   return (
     <div className="space-y-6">
@@ -30,52 +15,6 @@ export const Settings = () => {
       <div>
         <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
         <p className="text-gray-400">Customize your Invest IQ experience</p>
-      </div>
-
-      {/* API Configuration */}
-      <div className="glass-card p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Shield className="h-5 w-5 text-blue-400" />
-          <h2 className="text-xl font-semibold text-white">API Configuration</h2>
-        </div>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Finnhub API Key
-            </label>
-            <Input
-              type="password"
-              placeholder="Enter your Finnhub API key for real-time data"
-              value={finnhubKey}
-              onChange={(e) => setFinnhubKey(e.target.value)}
-              className="bg-white/10 border-white/20 text-white placeholder-white/60"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Get your free API key at <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">finnhub.io</a>
-            </p>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              OpenRouter API Key
-            </label>
-            <Input
-              type="password"
-              placeholder="Enter your OpenRouter API key for AI features"
-              value={openRouterKey}
-              onChange={(e) => setOpenRouterKey(e.target.value)}
-              className="bg-white/10 border-white/20 text-white placeholder-white/60"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Get your API key at <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">openrouter.ai</a>
-            </p>
-          </div>
-          
-          <Button onClick={handleSaveApiKeys} className="bg-gradient-to-r from-green-400 to-blue-500">
-            Save API Keys
-          </Button>
-        </div>
       </div>
 
       {/* Appearance */}
