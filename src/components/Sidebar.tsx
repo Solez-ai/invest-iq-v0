@@ -70,7 +70,7 @@ export const Sidebar = ({ activeSection, onSectionChange, isCollapsed, onToggle 
                   isCollapsed ? "px-3" : "px-4",
                   isActive 
                     ? "bg-gradient-to-r from-green-400/20 to-blue-500/20 text-green-400 border border-green-400/30" 
-                    : "hover:bg-white/10 text-gray-300 hover:text-white"
+                    : "hover:bg-white/10 light:text-black dark:text-gray-300 light:hover:text-black dark:hover:text-white"
                 )}
                 onClick={() => onSectionChange(item.id)}
               >
@@ -88,7 +88,7 @@ export const Sidebar = ({ activeSection, onSectionChange, isCollapsed, onToggle 
       {/* Footer */}
       {!isCollapsed && (
         <div className="p-4 border-t border-white/10">
-          <p className="text-xs text-gray-400 text-center">
+          <p className="text-xs light:text-gray-600 dark:text-gray-400 text-center">
             Real-time market data
           </p>
         </div>
