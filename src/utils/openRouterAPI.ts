@@ -1,6 +1,6 @@
 
 // OpenRouter API integration for DeepSeek AI
-const OPENROUTER_API_KEY = 'demo'; // Users will need to replace with their key
+const OPENROUTER_API_KEY = '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';
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 export interface ChatMessage {
@@ -33,7 +33,7 @@ class OpenRouterAPI {
     this.baseUrl = OPENROUTER_BASE_URL;
   }
 
-  async chat(messages: ChatMessage[], model: string = 'deepseek/deepseek-chat'): Promise<string> {
+  async chat(messages: ChatMessage[], model: string = 'deepseek/deepseek-chat-v3-0324:free'): Promise<string> {
     try {
       const response = await fetch(this.baseUrl, {
         method: 'POST',

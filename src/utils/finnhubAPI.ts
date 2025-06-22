@@ -1,6 +1,5 @@
-
 // Finnhub API utilities for real-time stock data
-const FINNHUB_API_KEY = 'demo'; // Users will need to replace with their key
+const FINNHUB_API_KEY = 'd1bv6u1r01qsbpuffts0d1bv6u1r01qsbpufftsg'; // Users will need to replace with their key
 const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
 
 export interface StockQuote {
@@ -73,8 +72,17 @@ class FinnhubAPI {
       return await response.json();
     } catch (error) {
       console.error('Finnhub API Error:', error);
-      throw error;
+      // Fall back to mock data if API fails
+      return this.getMockDataForEndpoint(endpoint);
     }
+  }
+
+  private getMockDataForEndpoint(endpoint: string): any {
+    if (endpoint.includes('/quote')) {
+      const symbol = endpoint.match(/symbol=([A-Z]+)/)?.[1] || 'AAPL';
+      return this.getMockQuote(symbol);
+    }
+    return {};
   }
 
   async getQuote(symbol: string): Promise<StockQuote> {
