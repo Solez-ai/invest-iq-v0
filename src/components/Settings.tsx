@@ -1,7 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Moon, Sun, Globe, DollarSign, Bell } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -9,26 +10,37 @@ export const Settings = () => {
   const [notifications, setNotifications] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
+  // Apply theme changes to document
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-        <p className="text-gray-400">Customize your Invest IQ experience</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
+        <p className="text-muted-foreground">Customize your Invest IQ experience</p>
       </div>
 
       {/* Appearance */}
       <div className="glass-card p-6">
         <div className="flex items-center gap-2 mb-4">
-          {isDarkMode ? <Moon className="h-5 w-5 text-blue-400" /> : <Sun className="h-5 w-5 text-yellow-400" />}
-          <h2 className="text-xl font-semibold text-white">Appearance</h2>
+          {isDarkMode ? <Moon className="h-5 w-5 text-blue-400" /> : <Sun className="h-5 w-5 text-yellow-500" />}
+          <h2 className="text-xl font-semibold text-foreground">Appearance</h2>
         </div>
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <label className="text-sm font-medium text-white">Dark Mode</label>
-              <p className="text-xs text-gray-400">Toggle between light and dark themes</p>
+              <label className="text-sm font-medium text-foreground">Dark Mode</label>
+              <p className="text-xs text-muted-foreground">Toggle between light and dark themes</p>
             </div>
             <Switch 
               checked={isDarkMode} 
@@ -42,31 +54,32 @@ export const Settings = () => {
       <div className="glass-card p-6">
         <div className="flex items-center gap-2 mb-4">
           <DollarSign className="h-5 w-5 text-green-400" />
-          <h2 className="text-xl font-semibold text-white">Market Data</h2>
+          <h2 className="text-xl font-semibold text-foreground">Market Data</h2>
         </div>
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Primary Currency
             </label>
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="w-full p-2 bg-white/10 border border-white/20 rounded-md text-white"
-            >
-              <option value="USD">USD - US Dollar</option>
-              <option value="EUR">EUR - Euro</option>
-              <option value="GBP">GBP - British Pound</option>
-              <option value="INR">INR - Indian Rupee</option>
-              <option value="CAD">CAD - Canadian Dollar</option>
-            </select>
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger className="w-full bg-purple-500/20 border-purple-400/30 text-foreground hover:bg-purple-500/30 focus:ring-purple-400">
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent className="bg-background/95 backdrop-blur-xl border-purple-400/30 shadow-2xl">
+                <SelectItem value="USD" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">USD - US Dollar</SelectItem>
+                <SelectItem value="EUR" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">EUR - Euro</SelectItem>
+                <SelectItem value="GBP" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">GBP - British Pound</SelectItem>
+                <SelectItem value="INR" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">INR - Indian Rupee</SelectItem>
+                <SelectItem value="CAD" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">CAD - Canadian Dollar</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="flex items-center justify-between">
             <div>
-              <label className="text-sm font-medium text-white">Auto-refresh Data</label>
-              <p className="text-xs text-gray-400">Automatically update prices every 30 seconds</p>
+              <label className="text-sm font-medium text-foreground">Auto-refresh Data</label>
+              <p className="text-xs text-muted-foreground">Automatically update prices every 30 seconds</p>
             </div>
             <Switch 
               checked={autoRefresh} 
@@ -80,14 +93,14 @@ export const Settings = () => {
       <div className="glass-card p-6">
         <div className="flex items-center gap-2 mb-4">
           <Bell className="h-5 w-5 text-blue-400" />
-          <h2 className="text-xl font-semibold text-white">Notifications</h2>
+          <h2 className="text-xl font-semibold text-foreground">Notifications</h2>
         </div>
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <label className="text-sm font-medium text-white">Price Alerts</label>
-              <p className="text-xs text-gray-400">Get notified when stocks hit your target prices</p>
+              <label className="text-sm font-medium text-foreground">Price Alerts</label>
+              <p className="text-xs text-muted-foreground">Get notified when stocks hit your target prices</p>
             </div>
             <Switch 
               checked={notifications} 
@@ -97,16 +110,16 @@ export const Settings = () => {
           
           <div className="flex items-center justify-between">
             <div>
-              <label className="text-sm font-medium text-white">Market News</label>
-              <p className="text-xs text-gray-400">Receive breaking market news notifications</p>
+              <label className="text-sm font-medium text-foreground">Market News</label>
+              <p className="text-xs text-muted-foreground">Receive breaking market news notifications</p>
             </div>
             <Switch checked={true} />
           </div>
           
           <div className="flex items-center justify-between">
             <div>
-              <label className="text-sm font-medium text-white">AI Insights</label>
-              <p className="text-xs text-gray-400">Get AI-powered market insights and recommendations</p>
+              <label className="text-sm font-medium text-foreground">AI Insights</label>
+              <p className="text-xs text-muted-foreground">Get AI-powered market insights and recommendations</p>
             </div>
             <Switch checked={true} />
           </div>
@@ -117,10 +130,10 @@ export const Settings = () => {
       <div className="glass-card p-6">
         <div className="flex items-center gap-2 mb-4">
           <Globe className="h-5 w-5 text-purple-400" />
-          <h2 className="text-xl font-semibold text-white">About Invest IQ</h2>
+          <h2 className="text-xl font-semibold text-foreground">About Invest IQ</h2>
         </div>
         
-        <div className="space-y-3 text-gray-300">
+        <div className="space-y-3 text-muted-foreground">
           <p>Version 1.0.0</p>
           <p>Your intelligent investment companion powered by real-time market data and AI analysis.</p>
           <div className="flex gap-4 text-sm">
