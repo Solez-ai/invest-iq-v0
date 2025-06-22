@@ -85,8 +85,8 @@ export const Diary = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Investment Diary</h1>
-          <p className="text-gray-400">Track your thoughts, decisions, and market insights</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Investment Diary</h1>
+          <p className="text-muted-foreground">Track your thoughts, decisions, and market insights</p>
         </div>
         <Button
           onClick={() => setShowForm(!showForm)}
@@ -100,29 +100,29 @@ export const Diary = () => {
       {/* New Entry Form */}
       {showForm && (
         <div className="glass-card p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">New Diary Entry</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4">New Diary Entry</h2>
           <div className="space-y-4">
             <Input
               placeholder="Entry title..."
               value={newEntry.title}
               onChange={(e) => setNewEntry({ ...newEntry, title: e.target.value })}
-              className="bg-white/10 border-white/20 text-white placeholder-white/60"
+              className="bg-background/50 border-border text-foreground placeholder-muted-foreground"
             />
             
             <Textarea
               placeholder="Share your thoughts, market observations, or investment decisions..."
               value={newEntry.content}
               onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
-              className="bg-white/10 border-white/20 text-white placeholder-white/60 min-h-[120px]"
+              className="bg-background/50 border-border text-foreground placeholder-muted-foreground min-h-[120px]"
             />
             
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Mood</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Mood</label>
                 <select
                   value={newEntry.mood}
                   onChange={(e) => setNewEntry({ ...newEntry, mood: e.target.value as any })}
-                  className="w-full p-2 bg-white/10 border border-white/20 rounded-md text-white"
+                  className="w-full p-2 bg-background/50 border border-border rounded-md text-foreground"
                 >
                   <option value="bullish">Bullish 📈</option>
                   <option value="bearish">Bearish 📉</option>
@@ -131,12 +131,12 @@ export const Diary = () => {
               </div>
               
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Tags</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Tags</label>
                 <Input
                   placeholder="e.g., AAPL, earnings, tech"
                   value={newEntry.tags}
                   onChange={(e) => setNewEntry({ ...newEntry, tags: e.target.value })}
-                  className="bg-white/10 border-white/20 text-white placeholder-white/60"
+                  className="bg-background/50 border-border text-foreground placeholder-muted-foreground"
                 />
               </div>
             </div>
@@ -145,7 +145,7 @@ export const Diary = () => {
               <Button onClick={handleAddEntry} className="bg-gradient-to-r from-green-400 to-blue-500">
                 Save Entry
               </Button>
-              <Button variant="outline" onClick={() => setShowForm(false)} className="border-white/20 text-white">
+              <Button variant="outline" onClick={() => setShowForm(false)} className="border-border text-foreground">
                 Cancel
               </Button>
             </div>
@@ -157,9 +157,9 @@ export const Diary = () => {
       <div className="space-y-4">
         {entries.length === 0 ? (
           <div className="glass-card p-8 text-center">
-            <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2">No entries yet</h3>
-            <p className="text-gray-400 mb-4">Start documenting your investment journey</p>
+            <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">No entries yet</h3>
+            <p className="text-muted-foreground mb-4">Start documenting your investment journey</p>
             <Button
               onClick={() => setShowForm(true)}
               className="bg-gradient-to-r from-green-400 to-blue-500"
@@ -173,9 +173,9 @@ export const Diary = () => {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   {getMoodIcon(entry.mood)}
-                  <h3 className="text-lg font-semibold text-white">{entry.title}</h3>
+                  <h3 className="text-lg font-semibold text-foreground">{entry.title}</h3>
                 </div>
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-muted-foreground">
                   {entry.date.toLocaleDateString()} at {entry.date.toLocaleTimeString([], { 
                     hour: '2-digit', 
                     minute: '2-digit' 
@@ -183,14 +183,14 @@ export const Diary = () => {
                 </span>
               </div>
               
-              <p className="text-gray-300 mb-4 whitespace-pre-wrap">{entry.content}</p>
+              <p className="text-foreground mb-4 whitespace-pre-wrap">{entry.content}</p>
               
               {entry.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {entry.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-white/10 rounded-full text-xs text-gray-300"
+                      className="px-2 py-1 bg-accent rounded-full text-xs text-foreground"
                     >
                       #{tag}
                     </span>
@@ -205,23 +205,23 @@ export const Diary = () => {
       {/* Stats */}
       {entries.length > 0 && (
         <div className="glass-card p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Your Journey</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Your Journey</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">{entries.length}</div>
-              <div className="text-sm text-gray-400">Total Entries</div>
+              <div className="text-2xl font-bold text-foreground">{entries.length}</div>
+              <div className="text-sm text-muted-foreground">Total Entries</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-400">
                 {entries.filter(e => e.mood === 'bullish').length}
               </div>
-              <div className="text-sm text-gray-400">Bullish Days</div>
+              <div className="text-sm text-muted-foreground">Bullish Days</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-400">
                 {entries.filter(e => e.mood === 'bearish').length}
               </div>
-              <div className="text-sm text-gray-400">Bearish Days</div>
+              <div className="text-sm text-muted-foreground">Bearish Days</div>
             </div>
           </div>
         </div>
