@@ -104,10 +104,10 @@ export const Dashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Welcome back to Invest IQ
           </h1>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             {currentTime.toLocaleDateString('en-US', { 
               weekday: 'long', 
               year: 'numeric', 
@@ -118,8 +118,8 @@ export const Dashboard = () => {
         </div>
         <div className="glass-card p-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-400">+2.4%</div>
-            <div className="text-sm text-gray-400">Portfolio Today</div>
+            <div className="text-2xl font-bold profit">+2.4%</div>
+            <div className="text-sm text-muted-foreground">Portfolio Today</div>
           </div>
         </div>
       </div>
@@ -131,16 +131,16 @@ export const Dashboard = () => {
           return (
             <div key={index} className="glass-card p-4">
               <div className="flex items-center justify-between mb-2">
-                <Icon className="h-5 w-5 text-blue-400" />
-                <span className={`text-sm ${stat.positive ? 'text-green-400' : 'text-red-400'}`}>
+                <Icon className="h-5 w-5 text-primary" />
+                <span className={`text-sm ${stat.positive ? 'profit' : 'loss'}`}>
                   {stat.change}
                 </span>
               </div>
               <div>
-                <div className="text-2xl font-bold text-white mb-1">
+                <div className="text-2xl font-bold text-foreground mb-1">
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-400">
+                <div className="text-sm text-muted-foreground">
                   {stat.title}
                 </div>
               </div>
@@ -152,7 +152,7 @@ export const Dashboard = () => {
       {/* Search Bar */}
       <div className="glass-card p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search stocks, ETFs, crypto..."
             value={searchTerm}
@@ -160,21 +160,21 @@ export const Dashboard = () => {
               setSearchTerm(e.target.value);
               handleSearch(e.target.value);
             }}
-            className="pl-10 bg-white/10 border-white/20 text-white placeholder-white/60"
+            className="pl-10 bg-background/50 border-border text-foreground placeholder-muted-foreground"
           />
           {searchResults.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 rounded-lg border border-white/20 z-10 max-h-60 overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg border border-border z-10 max-h-60 overflow-y-auto">
               {searchResults.map((result: any, index) => (
                 <div
                   key={index}
-                  className="p-3 hover:bg-white/10 cursor-pointer border-b border-white/10 last:border-b-0"
+                  className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0"
                   onClick={() => {
                     setSearchTerm('');
                     setSearchResults([]);
                   }}
                 >
-                  <div className="text-white font-medium">{result.symbol}</div>
-                  <div className="text-gray-400 text-sm">{result.description}</div>
+                  <div className="text-foreground font-medium">{result.symbol}</div>
+                  <div className="text-muted-foreground text-sm">{result.description}</div>
                 </div>
               ))}
             </div>
@@ -185,11 +185,11 @@ export const Dashboard = () => {
       {/* Filter Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="glass-card p-1 grid w-full grid-cols-5">
-          <TabsTrigger value="all" className="text-white data-[state=active]:bg-white/20">All</TabsTrigger>
-          <TabsTrigger value="us" className="text-white data-[state=active]:bg-white/20">🇺🇸 US</TabsTrigger>
-          <TabsTrigger value="global" className="text-white data-[state=active]:bg-white/20">🌍 Global</TabsTrigger>
-          <TabsTrigger value="etfs" className="text-white data-[state=active]:bg-white/20">📦 ETFs</TabsTrigger>
-          <TabsTrigger value="crypto" className="text-white data-[state=active]:bg-white/20">₿ Crypto</TabsTrigger>
+          <TabsTrigger value="all" className="text-foreground data-[state=active]:bg-accent">All</TabsTrigger>
+          <TabsTrigger value="us" className="text-foreground data-[state=active]:bg-accent">🇺🇸 US</TabsTrigger>
+          <TabsTrigger value="global" className="text-foreground data-[state=active]:bg-accent">🌍 Global</TabsTrigger>
+          <TabsTrigger value="etfs" className="text-foreground data-[state=active]:bg-accent">📦 ETFs</TabsTrigger>
+          <TabsTrigger value="crypto" className="text-foreground data-[state=active]:bg-accent">₿ Crypto</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="mt-6 space-y-8">
@@ -220,8 +220,8 @@ export const Dashboard = () => {
       {/* Your Watchlist */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-white">Your Watchlist</h2>
-          <span className="text-sm text-gray-400">Live prices • Auto-refresh</span>
+          <h2 className="text-xl font-semibold text-foreground">Your Watchlist</h2>
+          <span className="text-sm text-muted-foreground">Live prices • Auto-refresh</span>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -240,40 +240,40 @@ export const Dashboard = () => {
 
       {/* Market Insights */}
       <div className="glass-card p-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Market Insights</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-4">Market Insights</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h3 className="text-lg font-medium text-white mb-2">Today's Movers</h3>
+            <h3 className="text-lg font-medium text-foreground mb-2">Today's Movers</h3>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">NVDA</span>
-                <span className="text-green-400">+5.50%</span>
+                <span className="text-muted-foreground">NVDA</span>
+                <span className="profit">+5.50%</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">TSLA</span>
-                <span className="text-green-400">+5.47%</span>
+                <span className="text-muted-foreground">TSLA</span>
+                <span className="profit">+5.47%</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">GOOGL</span>
-                <span className="text-green-400">+0.83%</span>
+                <span className="text-muted-foreground">GOOGL</span>
+                <span className="profit">+0.83%</span>
               </div>
             </div>
           </div>
           
           <div>
-            <h3 className="text-lg font-medium text-white mb-2">Market Sentiment</h3>
+            <h3 className="text-lg font-medium text-foreground mb-2">Market Sentiment</h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-gray-300">Overall</span>
-                <span className="text-green-400 font-medium">Bullish</span>
+                <span className="text-muted-foreground">Overall</span>
+                <span className="profit font-medium">Bullish</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-300">Tech Sector</span>
-                <span className="text-green-400 font-medium">Strong</span>
+                <span className="text-muted-foreground">Tech Sector</span>
+                <span className="profit font-medium">Strong</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-300">Volatility</span>
-                <span className="text-blue-400 font-medium">Moderate</span>
+                <span className="text-muted-foreground">Volatility</span>
+                <span className="neutral font-medium">Moderate</span>
               </div>
             </div>
           </div>

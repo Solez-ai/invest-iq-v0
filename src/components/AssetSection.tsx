@@ -88,8 +88,8 @@ export const AssetSection = ({ title, icon, assets, type, showAll = false }: Ass
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{icon}</span>
-          <h2 className="text-xl font-semibold text-white">{title}</h2>
-          <span className="text-sm text-gray-400">({assets.length} assets)</span>
+          <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+          <span className="text-sm text-muted-foreground">({assets.length} assets)</span>
         </div>
         
         {!showAll && assets.length > 10 && (
@@ -97,7 +97,7 @@ export const AssetSection = ({ title, icon, assets, type, showAll = false }: Ass
             variant="outline"
             size="sm"
             onClick={handleShowMore}
-            className="border-white/20 text-white hover:bg-white/10"
+            className="border-border text-foreground hover:bg-accent"
           >
             {expanded ? (
               <>
@@ -128,7 +128,7 @@ export const AssetSection = ({ title, icon, assets, type, showAll = false }: Ass
 
       {visibleAssets.length === 0 && (
         <div className="glass-card p-8 text-center">
-          <p className="text-gray-400">No assets available in this category</p>
+          <p className="text-muted-foreground">No assets available in this category</p>
         </div>
       )}
     </div>

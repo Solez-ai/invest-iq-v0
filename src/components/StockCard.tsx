@@ -86,9 +86,9 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
   if (loading) {
     return (
       <div className="glass-card p-4 animate-pulse">
-        <div className="h-4 bg-white/20 rounded mb-2"></div>
-        <div className="h-6 bg-white/20 rounded mb-1"></div>
-        <div className="h-4 bg-white/20 rounded w-20"></div>
+        <div className="h-4 bg-muted rounded mb-2"></div>
+        <div className="h-6 bg-muted rounded mb-1"></div>
+        <div className="h-4 bg-muted rounded w-20"></div>
       </div>
     );
   }
@@ -96,7 +96,7 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
   if (!quote) return null;
 
   const isPositive = quote.dp >= 0;
-  const changeColor = isPositive ? 'text-green-400' : 'text-red-400';
+  const changeColor = isPositive ? 'profit' : 'loss';
   const glowClass = isPositive ? 'glow-green' : 'glow-red';
 
   return (
@@ -120,8 +120,8 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
           size="sm"
           variant="ghost"
           className={cn(
-            "h-6 w-6 p-0 hover:bg-white/20",
-            isPinned ? "text-yellow-400" : "text-white/60"
+            "h-6 w-6 p-0 hover:bg-accent",
+            isPinned ? "text-yellow-500" : "text-muted-foreground"
           )}
           onClick={togglePin}
         >
@@ -132,8 +132,8 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
           size="sm"
           variant="ghost"
           className={cn(
-            "h-6 w-6 p-0 hover:bg-white/20",
-            isInWatchlist ? "text-red-400" : "text-green-400"
+            "h-6 w-6 p-0 hover:bg-accent",
+            isInWatchlist ? "text-red-500" : "text-green-500"
           )}
           onClick={toggleWatchlist}
         >
@@ -148,9 +148,9 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
       <div className="mt-6">
         <div className="flex justify-between items-start mb-2">
           <div>
-            <h3 className="font-bold text-lg text-white">{symbol.replace(/^[A-Z]+:/, '')}</h3>
+            <h3 className="font-bold text-lg text-foreground">{symbol.replace(/^[A-Z]+:/, '')}</h3>
             {companyName && (
-              <p className="text-sm text-gray-400 truncate">{companyName}</p>
+              <p className="text-sm text-muted-foreground truncate">{companyName}</p>
             )}
           </div>
           <div className={cn("flex items-center", changeColor)}>
@@ -164,7 +164,7 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
         
         <div className="space-y-1">
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold text-white">
+            <span className="text-2xl font-bold text-foreground">
               ${quote.c.toFixed(2)}
             </span>
           </div>
@@ -178,7 +178,7 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
             </span>
           </div>
           
-          <div className="flex justify-between text-xs text-gray-400 mt-2">
+          <div className="flex justify-between text-xs text-muted-foreground mt-2">
             <span>H: ${quote.h.toFixed(2)}</span>
             <span>L: ${quote.l.toFixed(2)}</span>
           </div>
