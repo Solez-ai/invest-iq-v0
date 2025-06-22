@@ -7,33 +7,34 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Light mode colors - Purple theme */
+    --background: 250 100% 98%;
+    --foreground: 260 15% 8%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 250 100% 98%;
+    --card-foreground: 260 15% 8%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 250 100% 98%;
+    --popover-foreground: 260 15% 8%;
 
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
+    --primary: 270 95% 75%;
+    --primary-foreground: 260 15% 8%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 250 30% 92%;
+    --secondary-foreground: 260 15% 8%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 250 30% 92%;
+    --muted-foreground: 260 8% 46%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 250 30% 92%;
+    --accent-foreground: 260 15% 8%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 142.1 76.2% 36.3%;
+    --border: 250 30% 88%;
+    --input: 250 30% 88%;
+    --ring: 270 95% 75%;
 
     --radius: 0.5rem;
 
@@ -41,41 +42,76 @@
     --profit-green: 142.1 76.2% 36.3%;
     --loss-red: 0 84.2% 60.2%;
     --neutral-blue: 217.2 91.2% 59.8%;
-    --glass-bg: 240 10% 3.9% / 0.5;
-    --glass-border: 240 10% 20% / 0.3;
+    --glass-bg: 250 100% 98% / 0.7;
+    --glass-border: 250 30% 88% / 0.5;
   }
 
-  .light {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+  .dark {
+    /* Dark mode colors - Black and Purple theme */
+    --background: 260 15% 4%;
+    --foreground: 250 100% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card: 260 15% 4%;
+    --card-foreground: 250 100% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover: 260 15% 6%;
+    --popover-foreground: 250 100% 98%;
 
-    --primary: 142.1 70.6% 45.3%;
-    --primary-foreground: 144.9 80.4% 10%;
+    --primary: 270 95% 75%;
+    --primary-foreground: 260 15% 4%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 260 10% 10%;
+    --secondary-foreground: 250 100% 98%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 260 10% 10%;
+    --muted-foreground: 250 20% 65%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 260 10% 15%;
+    --accent-foreground: 250 100% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 142.1 70.6% 45.3%;
+    --border: 260 10% 15%;
+    --input: 260 10% 10%;
+    --ring: 270 95% 75%;
 
-    --glass-bg: 255 255 255 / 0.7;
-    --glass-border: 240 5.9% 90% / 0.5;
+    --glass-bg: 260 15% 4% / 0.5;
+    --glass-border: 270 95% 75% / 0.2;
+  }
+
+  .light {
+    /* Light mode colors - Purple theme */
+    --background: 250 100% 98%;
+    --foreground: 260 15% 8%;
+
+    --card: 250 100% 98%;
+    --card-foreground: 260 15% 8%;
+
+    --popover: 250 100% 98%;
+    --popover-foreground: 260 15% 8%;
+
+    --primary: 270 95% 75%;
+    --primary-foreground: 260 15% 8%;
+
+    --secondary: 250 30% 92%;
+    --secondary-foreground: 260 15% 8%;
+
+    --muted: 250 30% 92%;
+    --muted-foreground: 260 8% 46%;
+
+    --accent: 250 30% 92%;
+    --accent-foreground: 260 15% 8%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 250 30% 88%;
+    --input: 250 30% 88%;
+    --ring: 270 95% 75%;
+
+    --glass-bg: 250 100% 98% / 0.7;
+    --glass-border: 250 30% 88% / 0.5;
   }
 }
 
@@ -86,10 +122,25 @@
 
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Light mode background */
+  .light body {
     background-image: 
-      radial-gradient(at 40% 20%, rgb(120, 119, 198) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, rgb(120, 119, 198) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, rgb(14, 165, 233) 0px, transparent 50%);
+      radial-gradient(at 40% 20%, rgb(196, 181, 253) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, rgb(167, 139, 250) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, rgb(139, 92, 246) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+  
+  /* Dark mode background */
+  .dark body {
+    background-image: 
+      radial-gradient(at 40% 20%, rgb(88, 28, 135) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, rgb(59, 7, 100) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, rgb(88, 28, 135) 0px, transparent 50%),
+      radial-gradient(at 60% 80%, rgb(30, 27, 75) 0px, transparent 50%);
     background-attachment: fixed;
   }
 }
@@ -97,11 +148,29 @@
 /* Glassmorphism utilities */
 @layer utilities {
   .glass {
-    @apply bg-white/10 backdrop-blur-xl border border-white/20;
+    @apply backdrop-blur-xl border;
+    background: hsl(var(--glass-bg));
+    border-color: hsl(var(--glass-border));
   }
   
   .glass-card {
     @apply glass rounded-xl shadow-xl;
+  }
+  
+  /* Dark mode glass effects */
+  .dark .glass-card {
+    box-shadow: 
+      0 25px 50px -12px rgba(88, 28, 135, 0.25),
+      0 0 0 1px rgba(147, 51, 234, 0.1),
+      inset 0 1px 0 rgba(147, 51, 234, 0.1);
+  }
+  
+  /* Light mode glass effects */
+  .light .glass-card {
+    box-shadow: 
+      0 25px 50px -12px rgba(139, 92, 246, 0.15),
+      0 0 0 1px rgba(139, 92, 246, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
   
   .profit {
@@ -123,6 +192,10 @@
   .glow-red {
     box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
   }
+  
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
+  }
 }
 
 /* Custom scrollbar */
@@ -135,10 +208,19 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(147, 51, 234, 0.3);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(147, 51, 234, 0.5);
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(196, 181, 253, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(196, 181, 253, 0.5);
 }

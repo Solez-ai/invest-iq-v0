@@ -5,19 +5,32 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const Settings = () => {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [currency, setCurrency] = useState('USD');
   const [notifications, setNotifications] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
+  // Initialize theme based on system preference or saved preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    const shouldUseDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+    setIsDarkMode(shouldUseDark);
+  }, []);
+
   // Apply theme changes to document
   useEffect(() => {
+    const root = document.documentElement;
+    
     if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
+      root.classList.add('dark');
+      root.classList.remove('light');
+      localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.classList.add('light');
-      document.documentElement.classList.remove('dark');
+      root.classList.add('light');
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
 
@@ -32,7 +45,7 @@ export const Settings = () => {
       {/* Appearance */}
       <div className="glass-card p-6">
         <div className="flex items-center gap-2 mb-4">
-          {isDarkMode ? <Moon className="h-5 w-5 text-blue-400" /> : <Sun className="h-5 w-5 text-yellow-500" />}
+          {isDarkMode ? <Moon className="h-5 w-5 text-purple-400" /> : <Sun className="h-5 w-5 text-yellow-500" />}
           <h2 className="text-xl font-semibold text-foreground">Appearance</h2>
         </div>
         
@@ -63,15 +76,15 @@ export const Settings = () => {
               Primary Currency
             </label>
             <Select value={currency} onValueChange={setCurrency}>
-              <SelectTrigger className="w-full bg-purple-500/20 border-purple-400/30 text-foreground hover:bg-purple-500/30 focus:ring-purple-400">
+              <SelectTrigger className="w-full bg-background/50 border-border text-foreground hover:bg-background/70 focus:ring-primary">
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
-              <SelectContent className="bg-background/95 backdrop-blur-xl border-purple-400/30 shadow-2xl">
-                <SelectItem value="USD" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">USD - US Dollar</SelectItem>
-                <SelectItem value="EUR" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">EUR - Euro</SelectItem>
-                <SelectItem value="GBP" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">GBP - British Pound</SelectItem>
-                <SelectItem value="INR" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">INR - Indian Rupee</SelectItem>
-                <SelectItem value="CAD" className="text-foreground hover:bg-purple-500/20 focus:bg-purple-500/20">CAD - Canadian Dollar</SelectItem>
+              <SelectContent className="bg-background/95 backdrop-blur-xl border-border shadow-2xl">
+                <SelectItem value="USD" className="text-foreground hover:bg-accent focus:bg-accent">USD - US Dollar</SelectItem>
+                <SelectItem value="EUR" className="text-foreground hover:bg-accent focus:bg-accent">EUR - Euro</SelectItem>
+                <SelectItem value="GBP" className="text-foreground hover:bg-accent focus:bg-accent">GBP - British Pound</SelectItem>
+                <SelectItem value="INR" className="text-foreground hover:bg-accent focus:bg-accent">INR - Indian Rupee</SelectItem>
+                <SelectItem value="CAD" className="text-foreground hover:bg-accent focus:bg-accent">CAD - Canadian Dollar</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -137,9 +150,9 @@ export const Settings = () => {
           <p>Version 1.0.0</p>
           <p>Your intelligent investment companion powered by real-time market data and AI analysis.</p>
           <div className="flex gap-4 text-sm">
-            <a href="#" className="text-blue-400 hover:underline">Privacy Policy</a>
-            <a href="#" className="text-blue-400 hover:underline">Terms of Service</a>
-            <a href="#" className="text-blue-400 hover:underline">Support</a>
+            <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+            <a href="#" className="text-primary hover:underline">Terms of Service</a>
+            <a href="#" className="text-primary hover:underline">Support</a>
           </div>
         </div>
       </div>
