@@ -1,25 +1,19 @@
-
 import { useState, useEffect } from 'react';
 import { Moon, Sun, Globe, DollarSign, Bell } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const Settings = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Initialize based on current document state first
+    const currentTheme = document.documentElement.classList.contains('dark');
+    return currentTheme;
+  });
   const [currency, setCurrency] = useState('USD');
   const [notifications, setNotifications] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Initialize theme based on system preference or saved preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    const shouldUseDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
-    setIsDarkMode(shouldUseDark);
-  }, []);
-
-  // Apply theme changes to document
+  // Only apply theme changes when user explicitly toggles, not on component mount
   useEffect(() => {
     const root = document.documentElement;
     
