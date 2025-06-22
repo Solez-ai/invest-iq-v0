@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { Moon, Sun, Globe, DollarSign, Bell } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCurrency } from '@/hooks/useCurrency';
 
 export const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -9,7 +11,7 @@ export const Settings = () => {
     const currentTheme = document.documentElement.classList.contains('dark');
     return currentTheme;
   });
-  const [currency, setCurrency] = useState('USD');
+  const { currency, setCurrency } = useCurrency();
   const [notifications, setNotifications] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
 

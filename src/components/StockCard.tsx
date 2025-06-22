@@ -1,9 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Plus, Minus, Star } from 'lucide-react';
 import { finnhubAPI, type StockQuote } from '@/utils/finnhubAPI';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface StockCardProps {
   symbol: string;
@@ -17,6 +17,7 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
   const [loading, setLoading] = useState(true);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const { currencySymbol } = useCurrency();
 
   useEffect(() => {
     const fetchQuote = async () => {
@@ -165,7 +166,7 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
         <div className="space-y-1">
           <div className="flex justify-between items-center">
             <span className="text-2xl font-bold text-foreground">
-              ${quote.c.toFixed(2)}
+              {currencySymbol}{quote.c.toFixed(2)}
             </span>
           </div>
           
@@ -179,8 +180,8 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
           </div>
           
           <div className="flex justify-between text-xs text-muted-foreground mt-2">
-            <span>H: ${quote.h.toFixed(2)}</span>
-            <span>L: ${quote.l.toFixed(2)}</span>
+            <span>H: {currencySymbol}{quote.h.toFixed(2)}</span>
+            <span>L: {currencySymbol}{quote.l.toFixed(2)}</span>
           </div>
         </div>
       </div>
