@@ -1,11 +1,11 @@
-
 import { useState } from 'react';
 import { 
   LayoutDashboard, 
   Settings, 
   Menu,
   ChartCandlestick,
-  Calendar
+  Calendar,
+  Newspaper
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -21,6 +21,7 @@ export const Sidebar = ({ activeSection, onSectionChange, isCollapsed, onToggle 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'watchlist', label: 'Watchlist', icon: ChartCandlestick },
+    { id: 'news', label: 'Market News', icon: Newspaper },
     { id: 'diary', label: 'Diary', icon: Calendar },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];

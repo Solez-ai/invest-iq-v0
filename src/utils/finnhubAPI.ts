@@ -85,7 +85,21 @@ class FinnhubAPI {
     if (endpoint.includes('/search')) {
       return this.getMockSearchResults();
     }
+    if (endpoint.includes('/news')) {
+      return this.getMockNews();
+    }
     return {};
+  }
+
+  // News API methods
+  async getMarketNews(category: 'general' | 'crypto' | 'forex' = 'general'): Promise<NewsItem[]> {
+    return this.fetchData(`/news?category=${category}`);
+  }
+
+  async getCompanyNews(symbol: string, from?: string, to?: string): Promise<NewsItem[]> {
+    const fromDate = from || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const toDate = to || new Date().toISOString().split('T')[0];
+    return this.fetchData(`/company-news?symbol=${symbol}&from=${fromDate}&to=${toDate}`);
   }
 
   async getQuote(symbol: string): Promise<StockQuote> {
@@ -94,12 +108,6 @@ class FinnhubAPI {
 
   async getCompanyProfile(symbol: string): Promise<CompanyProfile> {
     return this.fetchData(`/stock/profile2?symbol=${symbol}`);
-  }
-
-  async getCompanyNews(symbol: string, from?: string, to?: string): Promise<NewsItem[]> {
-    const fromDate = from || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const toDate = to || new Date().toISOString().split('T')[0];
-    return this.fetchData(`/company-news?symbol=${symbol}&from=${fromDate}&to=${toDate}`);
   }
 
   async getNewsSentiment(symbol: string): Promise<NewsSentiment> {
@@ -140,6 +148,56 @@ class FinnhubAPI {
         { symbol: 'BINANCE:ETHUSDT', description: 'Ethereum/USDT', type: 'Cryptocurrency' },
       ]
     };
+  }
+
+  // Mock news data for demo
+  getMockNews(): NewsItem[] {
+    return [
+      {
+        category: 'general',
+        datetime: Date.now() / 1000,
+        headline: 'Federal Reserve Announces Interest Rate Decision',
+        id: 1,
+        image: 'https://via.placeholder.com/300x200',
+        related: 'SPY,QQQ',
+        source: 'Reuters',
+        summary: 'The Federal Reserve announced its latest interest rate decision, impacting global markets.',
+        url: 'https://example.com/news/1'
+      },
+      {
+        category: 'crypto',
+        datetime: Date.now() / 1000 - 3600,
+        headline: 'Bitcoin Reaches New Monthly High',
+        id: 2,
+        image: 'https://via.placeholder.com/300x200',
+        related: 'BTCUSDT',
+        source: 'CoinDesk',
+        summary: 'Bitcoin surged to a new monthly high as institutional investors show renewed interest.',
+        url: 'https://example.com/news/2'
+      },
+      {
+        category: 'general',
+        datetime: Date.now() / 1000 - 7200,
+        headline: 'Tech Stocks Rally on AI Breakthrough',
+        id: 3,
+        image: 'https://via.placeholder.com/300x200',
+        related: 'AAPL,GOOGL,MSFT',
+        source: 'TechCrunch',
+        summary: 'Major tech companies see stock prices rise following breakthrough AI announcements.',
+        url: 'https://example.com/news/3'
+      },
+      {
+        category: 'forex',
+        datetime: Date.now() / 1000 - 10800,
+        headline: 'Dollar Strengthens Against Euro',
+        id: 4,
+        image: 'https://via.placeholder.com/300x200',
+        related: 'EURUSD',
+        source: 'Financial Times',
+        summary: 'The US Dollar gained strength against the Euro amid positive economic data.',
+        url: 'https://example.com/news/4'
+      }
+    ];
   }
 
   // Mock data for demo purposes when API key is not available

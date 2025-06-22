@@ -6,6 +6,7 @@ import { Dashboard } from '@/components/Dashboard';
 import { Watchlist } from '@/components/Watchlist';
 import { Diary } from '@/components/Diary';
 import { Settings } from '@/components/Settings';
+import { News } from '@/components/News';
 import { AIAssistant } from '@/components/AIAssistant';
 import { CurrencyProvider } from '@/hooks/useCurrency';
 
@@ -20,6 +21,8 @@ const Index = () => {
         return <Dashboard />;
       case 'watchlist':
         return <Watchlist />;
+      case 'news':
+        return <News />;
       case 'diary':
         return <Diary />;
       case 'settings':
