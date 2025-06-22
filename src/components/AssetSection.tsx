@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { StockCard } from './StockCard';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { StockQuote } from '@/utils/finnhubAPI';
 
 interface AssetSectionProps {
   title: string;
@@ -10,9 +11,19 @@ interface AssetSectionProps {
   assets: string[];
   type: string;
   showAll?: boolean;
+  quotes?: Record<string, StockQuote>;
+  isRealTime?: boolean;
 }
 
-export const AssetSection = ({ title, icon, assets, type, showAll = false }: AssetSectionProps) => {
+export const AssetSection = ({ 
+  title, 
+  icon, 
+  assets, 
+  type, 
+  showAll = false,
+  quotes = {},
+  isRealTime = false
+}: AssetSectionProps) => {
   const [expanded, setExpanded] = useState(showAll);
   const [displayCount, setDisplayCount] = useState(showAll ? assets.length : 10);
 
@@ -90,6 +101,12 @@ export const AssetSection = ({ title, icon, assets, type, showAll = false }: Ass
           <span className="text-2xl">{icon}</span>
           <h2 className="text-xl font-semibold text-foreground">{title}</h2>
           <span className="text-sm text-muted-foreground">({assets.length} assets)</span>
+          {isRealTime && (
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-green-600">Live</span>
+            </div>
+          )}
         </div>
         
         {!showAll && assets.length > 10 && (
@@ -119,6 +136,8 @@ export const AssetSection = ({ title, icon, assets, type, showAll = false }: Ass
             symbol={symbol}
             companyName={getAssetName(symbol)}
             assetType={type}
+            quote={quotes[symbol]}
+            isRealTime={isRealTime}
             onClick={() => {
               console.log(`Selected ${symbol} from ${type}`);
             }}
