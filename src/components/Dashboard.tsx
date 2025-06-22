@@ -7,6 +7,7 @@ import { MarketStats } from './MarketStats';
 import { SearchBar } from './SearchBar';
 import { WatchlistSection } from './WatchlistSection';
 import { MarketInsights } from './MarketInsights';
+import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 
 const assetCategories = {
   us: {
@@ -35,6 +36,18 @@ export const Dashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState('all');
 
+  // Get all visible assets for real-time updates
+  const allAssets = Object.values(assetCategories).flatMap(category => 
+    category.assets.slice(0, 10) // Show top 10 per category on dashboard
+  );
+
+  // Set up real-time updates
+  const { quotes, loading, lastUpdate, isRealTimeEnabled } = useRealTimeUpdates({
+    symbols: allAssets,
+    enabled: true,
+    interval: 15000 // 15 seconds
+  });
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -47,6 +60,23 @@ export const Dashboard = () => {
     <div className="space-y-6">
       {/* Header */}
       <DashboardHeader currentTime={currentTime} />
+
+      {/* Real-time Status */}
+      {isRealTimeEnabled && (
+        <div className="glass-card p-3">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-foreground">Live Updates Active</span>
+            </div>
+            {lastUpdate && (
+              <span className="text-muted-foreground">
+                Last update: {lastUpdate.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Market Stats */}
       <MarketStats />
@@ -72,6 +102,8 @@ export const Dashboard = () => {
               icon={category.icon}
               assets={category.assets}
               type={key}
+              quotes={quotes}
+              isRealTime={isRealTimeEnabled}
             />
           ))}
         </TabsContent>
@@ -84,13 +116,15 @@ export const Dashboard = () => {
               assets={category.assets}
               type={key}
               showAll={true}
+              quotes={quotes}
+              isRealTime={is RealTimeEnabled}
             />
           </TabsContent>
         ))}
       </Tabs>
 
       {/* Your Watchlist */}
-      <WatchlistSection />
+      <WatchlistSection quotes={quotes} isRealTime={isRealTimeEnabled} />
 
       {/* Market Insights */}
       <MarketInsights />

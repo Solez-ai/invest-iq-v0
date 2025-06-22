@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Moon, Sun, Globe, DollarSign, Bell } from 'lucide-react';
+import { Moon, Sun, Globe, DollarSign, Bell, Zap } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -14,6 +14,9 @@ export const Settings = () => {
   const { currency, setCurrency } = useCurrency();
   const [notifications, setNotifications] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [liveUpdates, setLiveUpdates] = useState(() => {
+    return localStorage.getItem('liveUpdates') === 'true';
+  });
 
   // Only apply theme changes when user explicitly toggles, not on component mount
   useEffect(() => {
@@ -29,6 +32,13 @@ export const Settings = () => {
       localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
+
+  const handleLiveUpdatesChange = (enabled: boolean) => {
+    setLiveUpdates(enabled);
+    localStorage.setItem('liveUpdates', enabled.toString());
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('liveUpdatesChanged', { detail: enabled }));
+  };
 
   return (
     <div className="space-y-6">
@@ -87,6 +97,17 @@ export const Settings = () => {
           
           <div className="flex items-center justify-between">
             <div>
+              <label className="text-sm font-medium text-foreground">Live Updates</label>
+              <p className="text-xs text-muted-foreground">Real-time price updates every 15 seconds</p>
+            </div>
+            <Switch 
+              checked={liveUpdates} 
+              onCheckedChange={handleLiveUpdatesChange}
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
               <label className="text-sm font-medium text-foreground">Auto-refresh Data</label>
               <p className="text-xs text-muted-foreground">Automatically update prices every 30 seconds</p>
             </div>
@@ -94,6 +115,31 @@ export const Settings = () => {
               checked={autoRefresh} 
               onCheckedChange={setAutoRefresh}
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Real-Time Features */}
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Zap className="h-5 w-5 text-yellow-400" />
+          <h2 className="text-xl font-semibold text-foreground">Real-Time Features</h2>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="p-4 bg-accent/50 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-2 h-2 rounded-full ${liveUpdates ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+              <span className="text-sm font-medium text-foreground">
+                Live Updates: {liveUpdates ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {liveUpdates 
+                ? 'Your dashboard and watchlist are receiving real-time price updates every 15 seconds.'
+                : 'Enable Live Updates to get real-time price data automatically.'
+              }
+            </p>
           </div>
         </div>
       </div>
@@ -143,7 +189,7 @@ export const Settings = () => {
         </div>
         
         <div className="space-y-3 text-muted-foreground">
-          <p>Version 1.0.0</p>
+          <p>Version 4.0.0</p>
           <p>Your intelligent investment companion powered by real-time market data and AI analysis.</p>
           <div className="flex gap-4 text-sm">
             <a href="#" className="text-primary hover:underline">Privacy Policy</a>

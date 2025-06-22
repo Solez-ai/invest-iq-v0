@@ -10,17 +10,53 @@ interface StockCardProps {
   companyName?: string;
   assetType?: string;
   onClick?: () => void;
+  quote?: StockQuote; // Allow external quote to be passed in
+  isRealTime?: boolean;
 }
 
-export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCardProps) => {
-  const [quote, setQuote] = useState<StockQuote | null>(null);
-  const [loading, setLoading] = useState(true);
+export const StockCard = ({ symbol, companyName, assetType, onClick, quote: externalQuote, isRealTime = false }: StockCardProps) => {
+  const [quote, setQuote] = useState<StockQuote | null>(externalQuote || null);
+  const [loading, setLoading] = useState(!externalQuote);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [priceChanged, setPriceChanged] = useState<'up' | 'down' | null>(null);
   const { currencySymbol } = useCurrency();
+
+  // Use external quote if provided (for real-time updates)
+  useEffect(() => {
+    if (externalQuote) {
+      const oldPrice = quote?.c;
+      const newPrice = externalQuote.c;
+      
+      if (oldPrice && newPrice && oldPrice !== newPrice) {
+        setPriceChanged(newPrice > oldPrice ? 'up' : 'down');
+        setTimeout(() => setPriceChanged(null), 2000); // Clear animation after 2s
+      }
+      
+      setQuote(externalQuote);
+      setLoading(false);
+    }
+  }, [externalQuote, quote?.c]);
+
+  // Listen for price change events
+  useEffect(() => {
+    const handlePriceChange = (event: CustomEvent) => {
+      if (event.detail.symbol === symbol) {
+        setPriceChanged(event.detail.newPrice > event.detail.oldPrice ? 'up' : 'down');
+        setTimeout(() => setPriceChanged(null), 2000);
+      }
+    };
+
+    window.addEventListener('priceChanged', handlePriceChange as EventListener);
+    return () => {
+      window.removeEventListener('priceChanged', handlePriceChange as EventListener);
+    };
+  }, [symbol]);
 
   useEffect(() => {
     const fetchQuote = async () => {
+      if (externalQuote) return; // Don't fetch if external quote is provided
+      
       try {
         setLoading(true);
         // For demo, use mock data
@@ -43,10 +79,12 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
 
     fetchQuote();
     
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchQuote, 30000);
-    return () => clearInterval(interval);
-  }, [symbol]);
+    // Only set up auto-refresh if not using real-time updates
+    if (!isRealTime && !externalQuote) {
+      const interval = setInterval(fetchQuote, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [symbol, externalQuote, isRealTime]);
 
   const getAssetIcon = () => {
     if (assetType === 'us') return '🇺🇸';
@@ -104,10 +142,19 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
     <div 
       className={cn(
         "glass-card p-4 cursor-pointer transition-all duration-200 hover:scale-105 relative",
-        glowClass
+        glowClass,
+        priceChanged === 'up' && "animate-pulse bg-green-500/10 border-green-500/30",
+        priceChanged === 'down' && "animate-pulse bg-red-500/10 border-red-500/30"
       )}
       onClick={onClick}
     >
+      {/* Real-time indicator */}
+      {isRealTime && (
+        <div className="absolute top-1 left-1">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        </div>
+      )}
+      
       {/* Asset Type Icon */}
       {assetType && (
         <div className="absolute top-2 left-2 text-xs">
@@ -165,7 +212,11 @@ export const StockCard = ({ symbol, companyName, assetType, onClick }: StockCard
         
         <div className="space-y-1">
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold text-foreground">
+            <span className={cn(
+              "text-2xl font-bold text-foreground transition-colors duration-500",
+              priceChanged === 'up' && "text-green-500",
+              priceChanged === 'down' && "text-red-500"
+            )}>
               {currencySymbol}{quote.c.toFixed(2)}
             </span>
           </div>
