@@ -1,106 +1,59 @@
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StockCard } from './StockCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-const initialWatchlist = [
-  { symbol: 'AAPL', name: 'Apple Inc.', type: 'us' },
-  { symbol: 'GOOGL', name: 'Alphabet Inc.', type: 'us' },
-  { symbol: 'TSLA', name: 'Tesla Inc.', type: 'us' },
-  { symbol: 'MSFT', name: 'Microsoft Corp.', type: 'us' },
-  { symbol: 'NVDA', name: 'NVIDIA Corp.', type: 'us' },
-  { symbol: 'NS:RELIANCE', name: 'Reliance Industries', type: 'global' },
-  { symbol: 'SPY', name: 'SPDR S&P 500 ETF', type: 'etfs' },
-  { symbol: 'QQQ', name: 'Invesco QQQ Trust', type: 'etfs' },
-  { symbol: 'BINANCE:BTCUSDT', name: 'Bitcoin', type: 'crypto' },
-  { symbol: 'BINANCE:ETHUSDT', name: 'Ethereum', type: 'crypto' },
-];
+import { useUserWatchlist } from '@/hooks/useUserWatchlist';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Watchlist = () => {
-  const [watchlist, setWatchlist] = useState(initialWatchlist);
+  const { user } = useAuth();
+  const { watchlist, loading, addToWatchlist, removeFromWatchlist } = useUserWatchlist();
   const [searchTerm, setSearchTerm] = useState('');
   const [newSymbol, setNewSymbol] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-  const [pinnedAssets, setPinnedAssets] = useState<string[]>([]);
 
-  useEffect(() => {
-    // Load watchlist and pinned assets from localStorage
-    const savedWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    const savedPinned = JSON.parse(localStorage.getItem('pinnedAssets') || '[]');
-    
-    if (savedWatchlist.length > 0) {
-      // Convert saved symbols to full watchlist items
-      const fullWatchlist = savedWatchlist.map((symbol: string) => {
-        const existing = initialWatchlist.find(item => item.symbol === symbol);
-        if (existing) return existing;
-        
-        // Determine type based on symbol
-        let type = 'us';
-        let name = `${symbol} Inc.`;
-        
-        if (symbol.includes(':')) {
-          if (symbol.startsWith('BINANCE:')) {
-            type = 'crypto';
-            name = symbol.replace('BINANCE:', '').replace('USDT', '');
-          } else {
-            type = 'global';
-          }
-        } else if (['SPY', 'QQQ', 'VTI', 'IWM', 'EFA', 'GLD', 'TLT'].includes(symbol)) {
-          type = 'etfs';
-          name = `${symbol} ETF`;
-        }
-        
-        return { symbol, name, type };
-      });
-      setWatchlist(fullWatchlist);
-    }
-    
-    setPinnedAssets(savedPinned);
-  }, []);
-
-  const getAssetIcon = (type: string) => {
+  const getAssetIcon = (type: string | null) => {
     switch (type) {
-      case 'us': return '🇺🇸';
+      case 'Common Stock': return '🇺🇸';
       case 'global': return '🌍';
-      case 'etfs': return '📦';
+      case 'ETP': return '📦';
       case 'crypto': return '₿';
-      default: return '';
+      default: return '🇺🇸';
     }
+  };
+
+  const normalizeType = (type: string | null) => {
+    if (!type) return 'us';
+    if (type.includes('Common Stock')) return 'us';
+    if (type.includes('ETP')) return 'etfs';
+    if (type.includes('crypto')) return 'crypto';
+    return 'global';
   };
 
   const filteredWatchlist = watchlist.filter(stock => {
     const matchesSearch = stock.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         stock.name.toLowerCase().includes(searchTerm.toLowerCase());
+                         (stock.company_name && stock.company_name.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesFilter = activeFilter === 'all' || stock.type === activeFilter;
+    const normalizedType = normalizeType(stock.asset_type);
+    const matchesFilter = activeFilter === 'all' || normalizedType === activeFilter;
     
     return matchesSearch && matchesFilter;
   });
 
-  // Sort by pinned first, then alphabetically
-  const sortedWatchlist = filteredWatchlist.sort((a, b) => {
-    const aPinned = pinnedAssets.includes(a.symbol);
-    const bPinned = pinnedAssets.includes(b.symbol);
-    
-    if (aPinned && !bPinned) return -1;
-    if (!aPinned && bPinned) return 1;
-    return a.symbol.localeCompare(b.symbol);
-  });
-
-  const groupedWatchlist = sortedWatchlist.reduce((groups, stock) => {
-    const type = stock.type;
+  const groupedWatchlist = filteredWatchlist.reduce((groups, stock) => {
+    const type = normalizeType(stock.asset_type);
     if (!groups[type]) groups[type] = [];
     groups[type].push(stock);
     return groups;
   }, {} as Record<string, typeof watchlist>);
 
-  const handleAddStock = () => {
-    if (newSymbol.trim() && !watchlist.find(stock => stock.symbol === newSymbol.toUpperCase())) {
+  const handleAddStock = async () => {
+    if (newSymbol.trim()) {
       const symbol = newSymbol.toUpperCase();
-      let type = 'us';
+      let type = 'Common Stock';
       let name = `${symbol} Inc.`;
       
       // Determine type based on symbol pattern
@@ -112,33 +65,39 @@ export const Watchlist = () => {
           type = 'global';
         }
       } else if (['SPY', 'QQQ', 'VTI', 'IWM', 'EFA', 'GLD', 'TLT'].includes(symbol)) {
-        type = 'etfs';
+        type = 'ETP';
         name = `${symbol} ETF`;
       }
       
-      const newStock = { symbol, name, type };
-      const updatedWatchlist = [...watchlist, newStock];
-      setWatchlist(updatedWatchlist);
-      
-      // Save to localStorage
-      const symbols = updatedWatchlist.map(stock => stock.symbol);
-      localStorage.setItem('watchlist', JSON.stringify(symbols));
-      
-      setNewSymbol('');
+      const success = await addToWatchlist(symbol, name, type);
+      if (success) {
+        setNewSymbol('');
+      }
     }
   };
 
   const getTypeCounts = () => {
     return {
       all: watchlist.length,
-      us: watchlist.filter(s => s.type === 'us').length,
-      global: watchlist.filter(s => s.type === 'global').length,
-      etfs: watchlist.filter(s => s.type === 'etfs').length,
-      crypto: watchlist.filter(s => s.type === 'crypto').length,
+      us: watchlist.filter(s => normalizeType(s.asset_type) === 'us').length,
+      global: watchlist.filter(s => normalizeType(s.asset_type) === 'global').length,
+      etfs: watchlist.filter(s => normalizeType(s.asset_type) === 'etfs').length,
+      crypto: watchlist.filter(s => normalizeType(s.asset_type) === 'crypto').length,
     };
   };
 
   const counts = getTypeCounts();
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+          <p className="text-muted-foreground">Please sign in to access your watchlist.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -207,7 +166,12 @@ export const Watchlist = () => {
         </TabsList>
 
         <TabsContent value="all" className="mt-6 space-y-6">
-          {Object.entries(groupedWatchlist).map(([type, stocks]) => (
+          {loading ? (
+            <div className="glass-card p-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading your watchlist...</p>
+            </div>
+          ) : Object.entries(groupedWatchlist).map(([type, stocks]) => (
             <div key={type}>
               <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                 <span>{getAssetIcon(type)}</span>
@@ -220,15 +184,24 @@ export const Watchlist = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {stocks.map((stock) => (
-                  <StockCard
-                    key={stock.symbol}
-                    symbol={stock.symbol}
-                    companyName={stock.name}
-                    assetType={stock.type}
-                    onClick={() => {
-                      console.log(`Viewing details for ${stock.symbol}`);
-                    }}
-                  />
+                  <div key={stock.id} className="relative group">
+                    <StockCard
+                      symbol={stock.symbol}
+                      companyName={stock.company_name || undefined}
+                      assetType={normalizeType(stock.asset_type)}
+                      onClick={() => {
+                        console.log(`Viewing details for ${stock.symbol}`);
+                      }}
+                    />
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600"
+                      onClick={() => removeFromWatchlist(stock.symbol)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -237,29 +210,45 @@ export const Watchlist = () => {
 
         {['us', 'global', 'etfs', 'crypto'].map((type) => (
           <TabsContent key={type} value={type} className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {groupedWatchlist[type]?.map((stock) => (
-                <StockCard
-                  key={stock.symbol}
-                  symbol={stock.symbol}
-                  companyName={stock.name}
-                  assetType={stock.type}
-                  onClick={() => {
-                    console.log(`Viewing details for ${stock.symbol}`);
-                  }}
-                />
-              )) || (
-                <div className="col-span-full glass-card p-8 text-center">
-                  <p className="text-muted-foreground">No {type} assets in your watchlist</p>
-                </div>
-              )}
-            </div>
+            {loading ? (
+              <div className="glass-card p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading your watchlist...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {groupedWatchlist[type]?.map((stock) => (
+                  <div key={stock.id} className="relative group">
+                    <StockCard
+                      symbol={stock.symbol}
+                      companyName={stock.company_name || undefined}
+                      assetType={normalizeType(stock.asset_type)}
+                      onClick={() => {
+                        console.log(`Viewing details for ${stock.symbol}`);
+                      }}
+                    />
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600"
+                      onClick={() => removeFromWatchlist(stock.symbol)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )) || (
+                  <div className="col-span-full glass-card p-8 text-center">
+                    <p className="text-muted-foreground">No {type} assets in your watchlist</p>
+                  </div>
+                )}
+              </div>
+            )}
           </TabsContent>
         ))}
       </Tabs>
 
       {/* No results */}
-      {filteredWatchlist.length === 0 && (
+      {!loading && filteredWatchlist.length === 0 && watchlist.length > 0 && (
         <div className="glass-card p-8 text-center">
           <p className="text-muted-foreground mb-4">No assets match your search</p>
           <Button
@@ -272,6 +261,15 @@ export const Watchlist = () => {
           >
             Clear Filters
           </Button>
+        </div>
+      )}
+
+      {/* Empty watchlist */}
+      {!loading && watchlist.length === 0 && (
+        <div className="glass-card p-8 text-center">
+          <Plus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">Your watchlist is empty</h3>
+          <p className="text-muted-foreground mb-4">Start by adding some stocks to track</p>
         </div>
       )}
 

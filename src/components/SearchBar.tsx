@@ -1,9 +1,10 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Search, Plus, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { finnhubAPI } from '@/utils/finnhubAPI';
+import { useUserWatchlist } from '@/hooks/useUserWatchlist';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SearchResult {
   description: string;
@@ -16,18 +17,13 @@ export const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [watchlist, setWatchlist] = useState<string[]>([]);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLDivElement>(null);
 
-  // Load watchlist from localStorage
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    setWatchlist(stored);
-  }, []);
+  const { user } = useAuth();
+  const { isInWatchlist, addToWatchlist } = useUserWatchlist();
 
-  // Update dropdown position when search results change
   useEffect(() => {
     if (inputRef.current && (loading || searchResults.length > 0)) {
       const rect = inputRef.current.getBoundingClientRect();
@@ -48,7 +44,6 @@ export const SearchBar = () => {
     setLoading(true);
     try {
       const response = await finnhubAPI.searchSymbols(query);
-      // Handle the actual API response structure
       const results = response.result || response;
       setSearchResults(Array.isArray(results) ? results.slice(0, 8) : []);
     } catch (error) {
@@ -75,17 +70,11 @@ export const SearchBar = () => {
     debouncedSearch(value);
   };
 
-  const addToWatchlist = (symbol: string) => {
-    const updated = [...watchlist, symbol];
-    localStorage.setItem('watchlist', JSON.stringify(updated));
-    setWatchlist(updated);
-    
-    // Dispatch event to update other components
-    window.dispatchEvent(new CustomEvent('watchlistUpdated'));
-  };
-
-  const isInWatchlist = (symbol: string) => {
-    return watchlist.includes(symbol);
+  const handleAddToWatchlist = async (result: SearchResult) => {
+    const success = await addToWatchlist(result.symbol, result.description, result.type);
+    if (success) {
+      clearSearch();
+    }
   };
 
   const clearSearch = () => {
@@ -146,7 +135,7 @@ export const SearchBar = () => {
                   </div>
                   
                   <div className="ml-3">
-                    {isInWatchlist(result.symbol) ? (
+                    {user && isInWatchlist(result.symbol) ? (
                       <Button
                         size="sm"
                         variant="secondary"
@@ -159,10 +148,7 @@ export const SearchBar = () => {
                     ) : (
                       <Button
                         size="sm"
-                        onClick={() => {
-                          addToWatchlist(result.symbol);
-                          clearSearch();
-                        }}
+                        onClick={() => handleAddToWatchlist(result)}
                         className="text-xs"
                       >
                         <Plus className="h-3 w-3 mr-1" />

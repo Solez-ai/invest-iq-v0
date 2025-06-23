@@ -1,21 +1,15 @@
 
-import { useState, useEffect } from 'react';
-import { Calendar, TrendingUp, TrendingDown, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, TrendingUp, TrendingDown, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-
-interface DiaryEntry {
-  id: string;
-  date: Date;
-  title: string;
-  content: string;
-  mood: 'bullish' | 'bearish' | 'neutral';
-  tags: string[];
-}
+import { useUserDiary } from '@/hooks/useUserDiary';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Diary = () => {
-  const [entries, setEntries] = useState<DiaryEntry[]>([]);
+  const { user } = useAuth();
+  const { entries, loading, addEntry, deleteEntry } = useUserDiary();
   const [showForm, setShowForm] = useState(false);
   const [newEntry, setNewEntry] = useState({
     title: '',
@@ -24,41 +18,19 @@ export const Diary = () => {
     tags: '',
   });
 
-  // Load entries from localStorage on component mount
-  useEffect(() => {
-    const savedEntries = localStorage.getItem('investiq-diary');
-    if (savedEntries) {
-      const parsed = JSON.parse(savedEntries);
-      setEntries(parsed.map((entry: any) => ({
-        ...entry,
-        date: new Date(entry.date)
-      })));
-    }
-  }, []);
-
-  // Save entries to localStorage whenever entries change
-  useEffect(() => {
-    localStorage.setItem('investiq-diary', JSON.stringify(entries));
-  }, [entries]);
-
-  const handleAddEntry = () => {
+  const handleAddEntry = async () => {
     if (!newEntry.title.trim() || !newEntry.content.trim()) return;
 
-    const entry: DiaryEntry = {
-      id: Date.now().toString(),
-      date: new Date(),
-      title: newEntry.title,
-      content: newEntry.content,
-      mood: newEntry.mood,
-      tags: newEntry.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-    };
-
-    setEntries([entry, ...entries]);
-    setNewEntry({ title: '', content: '', mood: 'neutral', tags: '' });
-    setShowForm(false);
+    const tags = newEntry.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+    const success = await addEntry(newEntry.title, newEntry.content, newEntry.mood, tags);
+    
+    if (success) {
+      setNewEntry({ title: '', content: '', mood: 'neutral', tags: '' });
+      setShowForm(false);
+    }
   };
 
-  const getMoodIcon = (mood: string) => {
+  const getMoodIcon = (mood: string | null) => {
     switch (mood) {
       case 'bullish':
         return <TrendingUp className="h-4 w-4 text-green-400" />;
@@ -69,7 +41,7 @@ export const Diary = () => {
     }
   };
 
-  const getMoodColor = (mood: string) => {
+  const getMoodColor = (mood: string | null) => {
     switch (mood) {
       case 'bullish':
         return 'border-green-400/30 bg-green-400/5';
@@ -79,6 +51,18 @@ export const Diary = () => {
         return 'border-blue-400/30 bg-blue-400/5';
     }
   };
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <Calendar className="h-12 w-12 text-muted-foreground" />
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+          <p className="text-muted-foreground">Please sign in to access your investment diary.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -155,7 +139,12 @@ export const Diary = () => {
 
       {/* Entries List */}
       <div className="space-y-4">
-        {entries.length === 0 ? (
+        {loading ? (
+          <div className="glass-card p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading your diary entries...</p>
+          </div>
+        ) : entries.length === 0 ? (
           <div className="glass-card p-8 text-center">
             <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">No entries yet</h3>
@@ -175,17 +164,27 @@ export const Diary = () => {
                   {getMoodIcon(entry.mood)}
                   <h3 className="text-lg font-semibold text-foreground">{entry.title}</h3>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {entry.date.toLocaleDateString()} at {entry.date.toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(entry.created_at).toLocaleDateString()} at {new Date(entry.created_at).toLocaleTimeString([], { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteEntry(entry.id)}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               
               <p className="text-foreground mb-4 whitespace-pre-wrap">{entry.content}</p>
               
-              {entry.tags.length > 0 && (
+              {entry.tags && entry.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {entry.tags.map((tag, index) => (
                     <span

@@ -3,21 +3,17 @@ import { useState, useEffect } from 'react';
 import { Moon, Sun, Globe, DollarSign, Bell, Zap } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCurrency } from '@/hooks/useCurrency';
+import { useUserSettings } from '@/hooks/useUserSettings';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Settings = () => {
+  const { user } = useAuth();
+  const { settings, loading, saveSettings } = useUserSettings();
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Initialize based on current document state first
-    const currentTheme = document.documentElement.classList.contains('dark');
-    return currentTheme;
-  });
-  const { currency, setCurrency } = useCurrency();
-  const [notifications, setNotifications] = useState(true);
-  const [liveUpdates, setLiveUpdates] = useState(() => {
-    return localStorage.getItem('liveUpdates') === 'true';
+    return document.documentElement.classList.contains('dark');
   });
 
-  // Only apply theme changes when user explicitly toggles, not on component mount
+  // Update theme when user changes it
   useEffect(() => {
     const root = document.documentElement;
     
@@ -30,15 +26,53 @@ export const Settings = () => {
       root.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
-  }, [isDarkMode]);
+
+    // Save to database if user is signed in
+    if (user) {
+      saveSettings({ theme: isDarkMode ? 'dark' : 'light' });
+    }
+  }, [isDarkMode, user, saveSettings]);
+
+  // Sync with user settings when loaded
+  useEffect(() => {
+    if (!loading && user) {
+      setIsDarkMode(settings.theme === 'dark');
+    }
+  }, [settings, loading, user]);
+
+  const handleCurrencyChange = (currency: string) => {
+    if (user) {
+      saveSettings({ currency });
+    }
+  };
 
   const handleLiveUpdatesChange = (enabled: boolean) => {
     console.log('Settings: Changing live updates to:', enabled);
-    setLiveUpdates(enabled);
     localStorage.setItem('liveUpdates', enabled.toString());
-    // Dispatch custom event to notify other components
     window.dispatchEvent(new CustomEvent('liveUpdatesChanged', { detail: enabled }));
+    
+    if (user) {
+      saveSettings({ live_updates: enabled });
+    }
   };
+
+  const handleNotificationsChange = (enabled: boolean) => {
+    if (user) {
+      saveSettings({ notifications: enabled });
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <Globe className="h-12 w-12 text-muted-foreground" />
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+          <p className="text-muted-foreground">Please sign in to access your settings.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -81,7 +115,7 @@ export const Settings = () => {
             <label className="block text-sm font-medium text-foreground mb-2">
               Primary Currency
             </label>
-            <Select value={currency} onValueChange={setCurrency}>
+            <Select value={settings.currency} onValueChange={handleCurrencyChange}>
               <SelectTrigger className="w-full bg-background/50 border-border text-foreground hover:bg-background/70 focus:ring-primary">
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
@@ -101,7 +135,7 @@ export const Settings = () => {
               <p className="text-xs text-muted-foreground">Real-time price updates every 15 seconds</p>
             </div>
             <Switch 
-              checked={liveUpdates} 
+              checked={settings.live_updates} 
               onCheckedChange={handleLiveUpdatesChange}
             />
           </div>
@@ -118,13 +152,13 @@ export const Settings = () => {
         <div className="space-y-4">
           <div className="p-4 bg-accent/50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <div className={`w-2 h-2 rounded-full ${liveUpdates ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+              <div className={`w-2 h-2 rounded-full ${settings.live_updates ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
               <span className="text-sm font-medium text-foreground">
-                Live Updates: {liveUpdates ? 'Active' : 'Inactive'}
+                Live Updates: {settings.live_updates ? 'Active' : 'Inactive'}
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              {liveUpdates 
+              {settings.live_updates 
                 ? 'Your dashboard and watchlist are receiving real-time price updates every 15 seconds.'
                 : 'Enable Live Updates to get real-time price data automatically.'
               }
@@ -147,8 +181,8 @@ export const Settings = () => {
               <p className="text-xs text-muted-foreground">Get notified when stocks hit your target prices</p>
             </div>
             <Switch 
-              checked={notifications} 
-              onCheckedChange={setNotifications}
+              checked={settings.notifications} 
+              onCheckedChange={handleNotificationsChange}
             />
           </div>
           
