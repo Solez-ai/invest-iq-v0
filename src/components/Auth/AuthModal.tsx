@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Eye, EyeOff } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { TrendingUp, Eye, EyeOff, Twitter } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -15,12 +16,23 @@ interface AuthModalProps {
 }
 
 export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithTwitter } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const [signInData, setSignInData] = useState({ email: '', password: '' });
   const [signUpData, setSignUpData] = useState({ email: '', password: '', fullName: '' });
+
+  const handleTwitterSignIn = async () => {
+    setLoading(true);
+    const { error } = await signInWithTwitter();
+    
+    if (error) {
+      toast.error(error.message || 'An error occurred with Twitter sign in');
+    }
+    // Don't close modal or show success message for OAuth as it redirects
+    setLoading(false);
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +104,26 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
           </TabsList>
 
           <TabsContent value="signin" className="space-y-4">
+            {/* Twitter Sign In Button */}
+            <Button
+              onClick={handleTwitterSignIn}
+              disabled={loading}
+              variant="outline"
+              className="w-full border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white"
+            >
+              <Twitter className="h-4 w-4 mr-2" />
+              Continue with Twitter
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+              </div>
+            </div>
+
             <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="signin-email">Email</Label>
@@ -141,6 +173,26 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
           </TabsContent>
 
           <TabsContent value="signup" className="space-y-4">
+            {/* Twitter Sign Up Button */}
+            <Button
+              onClick={handleTwitterSignIn}
+              disabled={loading}
+              variant="outline"
+              className="w-full border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white"
+            >
+              <Twitter className="h-4 w-4 mr-2" />
+              Continue with Twitter
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or create account with email</span>
+              </div>
+            </div>
+
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="signup-name">Full Name</Label>

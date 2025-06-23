@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
+  signInWithTwitter: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -65,6 +66,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
+  const signInWithTwitter = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'twitter',
+      options: {
+        redirectTo: `${window.location.origin}/`
+      }
+    });
+    return { error };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -76,6 +87,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       loading,
       signIn,
       signUp,
+      signInWithTwitter,
       signOut,
     }}>
       {children}
