@@ -1,7 +1,7 @@
 
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface MessageInputProps {
   input: string;
@@ -19,20 +19,20 @@ export const MessageInput = ({ input, setInput, onSend, isLoading }: MessageInpu
   };
 
   return (
-    <div className="p-4 border-t border-white/10">
+    <div className="p-4 border-t border-border">
       <div className="flex space-x-2">
-        <Input
+        <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Ask about specific assets, market trends, or investment advice..."
-          className="bg-white/10 border-white/20 text-white placeholder-white/60"
+          className="min-h-[60px] resize-none bg-background border-border text-foreground placeholder:text-muted-foreground"
           disabled={isLoading}
         />
         <Button
           onClick={onSend}
           disabled={!input.trim() || isLoading}
-          className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600"
+          className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 self-end"
         >
           <Send className="h-4 w-4" />
         </Button>
