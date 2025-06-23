@@ -380,10 +380,13 @@ Keep your response concise (5-8 bullet points) and actionable.`;
                     li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
                     strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
                     em: ({node, ...props}) => <em className="italic" {...props} />,
-                    code: ({node, inline, ...props}) => 
-                      inline ? 
-                        <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono" {...props} /> :
-                        <code className="block bg-muted p-3 rounded text-sm font-mono whitespace-pre-wrap" {...props} />,
+                    code: ({node, ...props}) => {
+                      const hasParent = node?.parent?.type === 'element' && node.parent.tagName === 'pre';
+                      return hasParent ? 
+                        <code className="block bg-muted p-3 rounded text-sm font-mono whitespace-pre-wrap" {...props} /> :
+                        <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono" {...props} />;
+                    },
+                    pre: ({node, ...props}) => <pre className="bg-muted p-3 rounded text-sm font-mono whitespace-pre-wrap overflow-x-auto" {...props} />,
                     blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-primary pl-4 italic" {...props} />,
                   }}
                 >

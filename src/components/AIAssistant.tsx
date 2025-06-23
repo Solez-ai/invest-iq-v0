@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -229,10 +230,13 @@ Please provide investment advice based on the real-time data above. Consider dif
                         li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
                         strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
                         em: ({node, ...props}) => <em className="italic" {...props} />,
-                        code: ({node, inline, ...props}) => 
-                          inline ? 
-                            <code className="bg-white/20 px-1 py-0.5 rounded text-xs font-mono" {...props} /> :
-                            <code className="block bg-white/20 p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1" {...props} />,
+                        code: ({node, ...props}) => {
+                          const hasParent = node?.parent?.type === 'element' && node.parent.tagName === 'pre';
+                          return hasParent ? 
+                            <code className="block bg-white/20 p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1" {...props} /> :
+                            <code className="bg-white/20 px-1 py-0.5 rounded text-xs font-mono" {...props} />;
+                        },
+                        pre: ({node, ...props}) => <pre className="bg-white/20 p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1 overflow-x-auto" {...props} />,
                         blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-white/40 pl-2 italic" {...props} />,
                       }}
                     >
