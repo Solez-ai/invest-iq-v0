@@ -10,6 +10,7 @@ import { Settings } from '@/components/Settings';
 import { News } from '@/components/News';
 import { AssetComparison } from '@/components/AssetComparison';
 import { AIAssistant } from '@/components/AIAssistant';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { CurrencyProvider } from '@/hooks/useCurrency';
 
 const Index = () => {
@@ -22,15 +23,35 @@ const Index = () => {
       case 'dashboard':
         return <Dashboard />;
       case 'watchlist':
-        return <Watchlist />;
+        return (
+          <ProtectedRoute>
+            <Watchlist />
+          </ProtectedRoute>
+        );
       case 'news':
-        return <News />;
+        return (
+          <ProtectedRoute>
+            <News />
+          </ProtectedRoute>
+        );
       case 'compare':
-        return <AssetComparison />;
+        return (
+          <ProtectedRoute>
+            <AssetComparison />
+          </ProtectedRoute>
+        );
       case 'diary':
-        return <Diary />;
+        return (
+          <ProtectedRoute>
+            <Diary />
+          </ProtectedRoute>
+        );
       case 'settings':
-        return <Settings />;
+        return (
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        );
       default:
         return <Dashboard />;
     }
@@ -63,10 +84,12 @@ const Index = () => {
 
             {/* AI Assistant Sidebar */}
             <div className={`transition-all duration-300 ${aiAssistantOpen ? 'w-80' : 'w-0'} flex-shrink-0 overflow-hidden`}>
-              <AIAssistant
-                isOpen={aiAssistantOpen}
-                onClose={() => setAiAssistantOpen(false)}
-              />
+              <ProtectedRoute>
+                <AIAssistant
+                  isOpen={aiAssistantOpen}
+                  onClose={() => setAiAssistantOpen(false)}
+                />
+              </ProtectedRoute>
             </div>
           </div>
 

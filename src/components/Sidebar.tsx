@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { AuthButtons } from './Auth/AuthButtons';
 
 interface SidebarProps {
   activeSection: string;
@@ -56,6 +57,13 @@ export const Sidebar = ({ activeSection, onSectionChange, isCollapsed, onToggle 
             <Menu className="h-4 w-4" />
           </Button>
         </div>
+        
+        {/* Auth Buttons */}
+        {!isCollapsed && (
+          <div className="mt-4">
+            <AuthButtons />
+          </div>
+        )}
       </div>
 
       {/* Navigation Menu */}
