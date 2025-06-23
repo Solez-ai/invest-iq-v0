@@ -1,12 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
+import { useState } from 'react';
 import { openRouterAPI, type ChatMessage } from '@/utils/openRouterAPI';
 import { finnhubAPI } from '@/utils/finnhubAPI';
-import { cn } from '@/lib/utils';
-import ReactMarkdown from 'react-markdown';
+import { AIAssistantHeader } from './AIAssistant/AIAssistantHeader';
+import { MessageList } from './AIAssistant/MessageList';
+import { MessageInput } from './AIAssistant/MessageInput';
 
 interface AIAssistantProps {
   isOpen: boolean;
@@ -31,13 +29,6 @@ export const AIAssistant = ({ isOpen, onClose }: AIAssistantProps) => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
-  }, [messages]);
 
   const enhancePromptWithMarketData = async (userMessage: string): Promise<string> => {
     // Extract stock symbols from the message (including global and crypto formats)
@@ -162,142 +153,18 @@ Please provide investment advice based on the real-time data above. Consider dif
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
     <div className="glass-card h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
-            <Bot className="h-4 w-4 text-white" />
-          </div>
-          <h3 className="font-semibold text-white">AI Assistant</h3>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="p-2 hover:bg-white/10"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={cn(
-                "flex gap-3",
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              )}
-            >
-              {message.role === 'assistant' && (
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <Bot className="h-4 w-4 text-white" />
-                </div>
-              )}
-              
-              <div
-                className={cn(
-                  "max-w-[80%] p-3 rounded-lg",
-                  message.role === 'user'
-                    ? 'bg-gradient-to-r from-green-400 to-blue-500 text-white'
-                    : 'bg-white/10 text-white'
-                )}
-              >
-                <div className="text-sm">
-                  {message.role === 'assistant' ? (
-                    <ReactMarkdown
-                      components={{
-                        h1: ({node, ...props}) => <h1 className="text-base font-bold mb-2" {...props} />,
-                        h2: ({node, ...props}) => <h2 className="text-sm font-semibold mb-2" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-sm font-medium mb-1" {...props} />,
-                        p: ({node, ...props}) => <p className="mb-2 leading-relaxed" {...props} />,
-                        ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-2 space-y-1" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-2 space-y-1" {...props} />,
-                        li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
-                        strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
-                        em: ({node, ...props}) => <em className="italic" {...props} />,
-                        code: ({node, ...props}) => {
-                          const hasParent = (node as any)?.parent?.type === 'element' && (node as any).parent.tagName === 'pre';
-                          return hasParent ? 
-                            <code className="block bg-white/20 p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1" {...props} /> :
-                            <code className="bg-white/20 px-1 py-0.5 rounded text-xs font-mono" {...props} />;
-                        },
-                        pre: ({node, ...props}) => <pre className="bg-white/20 p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1 overflow-x-auto" {...props} />,
-                        blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-white/40 pl-2 italic" {...props} />,
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                  ) : (
-                    <span className="whitespace-pre-wrap">{message.content}</span>
-                  )}
-                </div>
-                <div className="text-xs opacity-70 mt-1">
-                  {message.timestamp.toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </div>
-              </div>
-              
-              {message.role === 'user' && (
-                <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <User className="h-4 w-4 text-white" />
-                </div>
-              )}
-            </div>
-          ))}
-          
-          {isLoading && (
-            <div className="flex gap-3 justify-start">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <Bot className="h-4 w-4 text-white" />
-              </div>
-              <div className="bg-white/10 p-3 rounded-lg">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </ScrollArea>
-
-      {/* Input */}
-      <div className="p-4 border-t border-white/10">
-        <div className="flex space-x-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask about specific assets, market trends, or investment advice..."
-            className="bg-white/10 border-white/20 text-white placeholder-white/60"
-            disabled={isLoading}
-          />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <AIAssistantHeader onClose={onClose} />
+      <MessageList messages={messages} isLoading={isLoading} />
+      <MessageInput 
+        input={input}
+        setInput={setInput}
+        onSend={handleSend}
+        isLoading={isLoading}
+      />
     </div>
   );
 };
