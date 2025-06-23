@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Search, Plus, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -91,7 +90,7 @@ export const SearchBar = () => {
         />
         
         {(loading || searchResults.length > 0) && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg border border-border z-50 max-h-80 overflow-y-auto shadow-lg">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg border border-border z-[9999] max-h-80 overflow-y-auto shadow-xl">
             {loading && (
               <div className="p-4 text-center text-muted-foreground">
                 Searching...
