@@ -29,30 +29,30 @@ export const Message = ({ content, role, timestamp }: MessageProps) => {
           "max-w-[80%] p-3 rounded-lg",
           role === 'user'
             ? 'bg-gradient-to-r from-green-400 to-blue-500 text-white'
-            : 'bg-white/10 text-white'
+            : 'bg-muted text-foreground border border-border'
         )}
       >
         <div className="text-sm">
           {role === 'assistant' ? (
             <ReactMarkdown
               components={{
-                h1: ({node, ...props}) => <h1 className="text-base font-bold mb-2" {...props} />,
-                h2: ({node, ...props}) => <h2 className="text-sm font-semibold mb-2" {...props} />,
-                h3: ({node, ...props}) => <h3 className="text-sm font-medium mb-1" {...props} />,
-                p: ({node, ...props}) => <p className="mb-2 leading-relaxed" {...props} />,
-                ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-2 space-y-1" {...props} />,
-                ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-2 space-y-1" {...props} />,
-                li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
-                strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
-                em: ({node, ...props}) => <em className="italic" {...props} />,
+                h1: ({node, ...props}) => <h1 className="text-base font-bold mb-2 text-foreground" {...props} />,
+                h2: ({node, ...props}) => <h2 className="text-sm font-semibold mb-2 text-foreground" {...props} />,
+                h3: ({node, ...props}) => <h3 className="text-sm font-medium mb-1 text-foreground" {...props} />,
+                p: ({node, ...props}) => <p className="mb-2 leading-relaxed text-foreground" {...props} />,
+                ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-2 space-y-1 text-foreground" {...props} />,
+                ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-2 space-y-1 text-foreground" {...props} />,
+                li: ({node, ...props}) => <li className="leading-relaxed text-foreground" {...props} />,
+                strong: ({node, ...props}) => <strong className="font-semibold text-foreground" {...props} />,
+                em: ({node, ...props}) => <em className="italic text-foreground" {...props} />,
                 code: ({node, ...props}) => {
                   const hasParent = (node as any)?.parent?.type === 'element' && (node as any).parent.tagName === 'pre';
                   return hasParent ? 
-                    <code className="block bg-white/20 p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1" {...props} /> :
-                    <code className="bg-white/20 px-1 py-0.5 rounded text-xs font-mono" {...props} />;
+                    <code className="block bg-accent p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1 text-foreground" {...props} /> :
+                    <code className="bg-accent px-1 py-0.5 rounded text-xs font-mono text-foreground" {...props} />;
                 },
-                pre: ({node, ...props}) => <pre className="bg-white/20 p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1 overflow-x-auto" {...props} />,
-                blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-white/40 pl-2 italic" {...props} />,
+                pre: ({node, ...props}) => <pre className="bg-accent p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1 overflow-x-auto text-foreground" {...props} />,
+                blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-border pl-2 italic text-muted-foreground" {...props} />,
               }}
             >
               {content}
@@ -61,7 +61,10 @@ export const Message = ({ content, role, timestamp }: MessageProps) => {
             <span className="whitespace-pre-wrap">{content}</span>
           )}
         </div>
-        <div className="text-xs opacity-70 mt-1">
+        <div className={cn(
+          "text-xs mt-1",
+          role === 'user' ? 'text-white/70' : 'text-muted-foreground'
+        )}>
           {timestamp.toLocaleTimeString([], { 
             hour: '2-digit', 
             minute: '2-digit' 

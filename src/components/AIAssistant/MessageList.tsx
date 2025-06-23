@@ -43,11 +43,11 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
             <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
               <Bot className="h-4 w-4 text-white" />
             </div>
-            <div className="bg-white/10 p-3 rounded-lg">
+            <div className="bg-muted p-3 rounded-lg">
               <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
               </div>
             </div>
           </div>
