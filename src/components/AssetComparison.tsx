@@ -156,12 +156,10 @@ export const AssetComparison = () => {
     setAiResponse('');
 
     try {
-      // Fetch real-time data for all selected assets
       const assetsWithData = await Promise.all(
         selectedAssets.map(asset => fetchAssetData(asset))
       );
 
-      // Construct AI prompt
       const assetSummaries = assetsWithData.map(asset => {
         const change = asset.quote ? asset.quote.dp : 0;
         const sentiment = asset.sentiment?.sentiment ? 
@@ -230,9 +228,9 @@ Keep your response concise (5-8 bullet points) and actionable.`;
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
         {/* Asset Selection Panel */}
-        <div className="xl:col-span-1 space-y-4">
+        <div className="xl:col-span-2 space-y-4">
           <div className="glass-card p-4">
             <h2 className="text-lg font-semibold text-foreground mb-4">Select Assets</h2>
             
@@ -281,7 +279,7 @@ Keep your response concise (5-8 bullet points) and actionable.`;
         </div>
 
         {/* Comparison Panel - Now takes more space */}
-        <div className="xl:col-span-2 space-y-4">
+        <div className="xl:col-span-3 space-y-4">
           {/* Drop Zone */}
           <div
             className={cn(
@@ -381,7 +379,7 @@ Keep your response concise (5-8 bullet points) and actionable.`;
                     strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
                     em: ({node, ...props}) => <em className="italic" {...props} />,
                     code: ({node, ...props}) => {
-                      const hasParent = node?.parent?.type === 'element' && node.parent.tagName === 'pre';
+                      const hasParent = (node as any)?.parent?.type === 'element' && (node as any).parent.tagName === 'pre';
                       return hasParent ? 
                         <code className="block bg-muted p-3 rounded text-sm font-mono whitespace-pre-wrap" {...props} /> :
                         <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono" {...props} />;

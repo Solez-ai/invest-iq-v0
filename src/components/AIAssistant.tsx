@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -231,7 +230,7 @@ Please provide investment advice based on the real-time data above. Consider dif
                         strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
                         em: ({node, ...props}) => <em className="italic" {...props} />,
                         code: ({node, ...props}) => {
-                          const hasParent = node?.parent?.type === 'element' && node.parent.tagName === 'pre';
+                          const hasParent = (node as any)?.parent?.type === 'element' && (node as any).parent.tagName === 'pre';
                           return hasParent ? 
                             <code className="block bg-white/20 p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1" {...props} /> :
                             <code className="bg-white/20 px-1 py-0.5 rounded text-xs font-mono" {...props} />;
