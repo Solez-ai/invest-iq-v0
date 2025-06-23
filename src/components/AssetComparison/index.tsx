@@ -17,6 +17,12 @@ interface AssetData {
   sentiment?: NewsSentiment;
 }
 
+interface AssetCategory {
+  label: string;
+  icon: string;
+  assets: string[];
+}
+
 export const AssetComparison = () => {
   const [selectedAssets, setSelectedAssets] = useState<AssetData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -180,7 +186,7 @@ Keep your response concise (5-8 bullet points) and actionable.`;
     }
   };
 
-  const filteredAssets = Object.entries(assetCategories).reduce((acc, [key, category]) => {
+  const filteredAssets: { [key: string]: AssetCategory } = Object.entries(assetCategories).reduce((acc, [key, category]) => {
     const filtered = category.assets.filter(symbol =>
       symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
       getAssetName(symbol).toLowerCase().includes(searchTerm.toLowerCase())
@@ -189,7 +195,7 @@ Keep your response concise (5-8 bullet points) and actionable.`;
       acc[key] = { ...category, assets: filtered };
     }
     return acc;
-  }, {} as typeof assetCategories);
+  }, {} as { [key: string]: AssetCategory });
 
   return (
     <div className="space-y-6">

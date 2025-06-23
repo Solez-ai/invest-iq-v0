@@ -3,12 +3,18 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search } from 'lucide-react';
 
+interface AssetCategory {
+  label: string;
+  icon: string;
+  assets: string[];
+}
+
 interface AssetCategoriesProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   activeCategory: string;
   setActiveCategory: (category: string) => void;
-  filteredAssets: any;
+  filteredAssets: { [key: string]: AssetCategory };
   getAssetName: (symbol: string) => string;
   handleDragStart: (e: React.DragEvent, symbol: string, type: string) => void;
 }
