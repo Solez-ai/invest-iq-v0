@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BarChart3, Search, X, Plus, Trash2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { finnhubAPI, type StockQuote, type CompanyProfile, type NewsSentiment } 
 import { openRouterAPI } from '@/utils/openRouterAPI';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
 
 interface AssetData {
   symbol: string;
@@ -230,9 +230,9 @@ Keep your response concise (5-8 bullet points) and actionable.`;
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Asset Selection Panel */}
-        <div className="space-y-4">
+        <div className="xl:col-span-1 space-y-4">
           <div className="glass-card p-4">
             <h2 className="text-lg font-semibold text-foreground mb-4">Select Assets</h2>
             
@@ -259,7 +259,7 @@ Keep your response concise (5-8 bullet points) and actionable.`;
 
               {Object.entries(filteredAssets).map(([key, category]) => (
                 <TabsContent key={key} value={key}>
-                  <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
                     {category.assets.map((symbol) => (
                       <div
                         key={symbol}
@@ -280,8 +280,8 @@ Keep your response concise (5-8 bullet points) and actionable.`;
           </div>
         </div>
 
-        {/* Comparison Panel */}
-        <div className="space-y-4">
+        {/* Comparison Panel - Now takes more space */}
+        <div className="xl:col-span-2 space-y-4">
           {/* Drop Zone */}
           <div
             className={cn(
@@ -361,21 +361,40 @@ Keep your response concise (5-8 bullet points) and actionable.`;
             )}
           </Button>
 
-          {/* AI Response */}
+          {/* AI Response with Markdown */}
           {aiResponse && (
-            <div className="glass-card p-4 animate-in fade-in-50 duration-500">
-              <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+            <div className="glass-card p-6 animate-in fade-in-50 duration-500">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Zap className="h-5 w-5 text-primary" />
                 AI Analysis
               </h3>
-              <div className="text-foreground whitespace-pre-line leading-relaxed">
-                {aiResponse}
+              <div className="text-foreground prose prose-invert max-w-none">
+                <ReactMarkdown
+                  components={{
+                    h1: ({node, ...props}) => <h1 className="text-xl font-bold mb-3" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-lg font-semibold mb-2" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-base font-medium mb-2" {...props} />,
+                    p: ({node, ...props}) => <p className="mb-3 leading-relaxed" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-3 space-y-1" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-3 space-y-1" {...props} />,
+                    li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+                    em: ({node, ...props}) => <em className="italic" {...props} />,
+                    code: ({node, inline, ...props}) => 
+                      inline ? 
+                        <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono" {...props} /> :
+                        <code className="block bg-muted p-3 rounded text-sm font-mono whitespace-pre-wrap" {...props} />,
+                    blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-primary pl-4 italic" {...props} />,
+                  }}
+                >
+                  {aiResponse}
+                </ReactMarkdown>
               </div>
             </div>
           )}
 
           {!aiResponse && selectedAssets.length > 0 && (
-            <div className="glass-card p-4 text-center text-muted-foreground">
+            <div className="glass-card p-6 text-center text-muted-foreground">
               <p>Once you click "Compare Assets", the AI will analyze and respond here with detailed insights.</p>
             </div>
           )}

@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { openRouterAPI, type ChatMessage } from '@/utils/openRouterAPI';
 import { finnhubAPI } from '@/utils/finnhubAPI';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
 
 interface AIAssistantProps {
   isOpen: boolean;
@@ -215,8 +216,31 @@ Please provide investment advice based on the real-time data above. Consider dif
                     : 'bg-white/10 text-white'
                 )}
               >
-                <div className="text-sm whitespace-pre-wrap">
-                  {message.content}
+                <div className="text-sm">
+                  {message.role === 'assistant' ? (
+                    <ReactMarkdown
+                      components={{
+                        h1: ({node, ...props}) => <h1 className="text-base font-bold mb-2" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-sm font-semibold mb-2" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-sm font-medium mb-1" {...props} />,
+                        p: ({node, ...props}) => <p className="mb-2 leading-relaxed" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-2 space-y-1" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-2 space-y-1" {...props} />,
+                        li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+                        em: ({node, ...props}) => <em className="italic" {...props} />,
+                        code: ({node, inline, ...props}) => 
+                          inline ? 
+                            <code className="bg-white/20 px-1 py-0.5 rounded text-xs font-mono" {...props} /> :
+                            <code className="block bg-white/20 p-2 rounded text-xs font-mono whitespace-pre-wrap mt-1" {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-white/40 pl-2 italic" {...props} />,
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  ) : (
+                    <span className="whitespace-pre-wrap">{message.content}</span>
+                  )}
                 </div>
                 <div className="text-xs opacity-70 mt-1">
                   {message.timestamp.toLocaleTimeString([], { 
