@@ -15,6 +15,7 @@ const getCategoryColor = (category: string) => {
     case 'forex':
       return 'bg-green-500';
     case 'general':
+    case 'top news':
       return 'bg-blue-500';
     default:
       return 'bg-gray-500';
@@ -58,6 +59,15 @@ export const News = () => {
 
   const filteredNews = (category: string) => {
     if (category === 'all') return allNews;
+    
+    // Handle different category matching logic
+    if (category === 'general') {
+      return allNews.filter(item => 
+        item.category.toLowerCase() === 'general' || 
+        item.category.toLowerCase() === 'top news'
+      );
+    }
+    
     return allNews.filter(item => item.category.toLowerCase() === category);
   };
 
@@ -106,6 +116,14 @@ export const News = () => {
     </Card>
   );
 
+  const NewsGrid = ({ news }: { news: NewsItem[] }) => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pr-4">
+      {news.map((item) => (
+        <NewsCard key={item.id} item={item} />
+      ))}
+    </div>
+  );
+
   const isLoading = generalLoading || cryptoLoading || forexLoading;
 
   return (
@@ -133,42 +151,26 @@ export const News = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
               ) : (
-                <div className="pr-4">
-                  {filteredNews('all').map((item) => (
-                    <NewsCard key={item.id} item={item} />
-                  ))}
-                </div>
+                <NewsGrid news={filteredNews('all')} />
               )}
             </ScrollArea>
           </TabsContent>
 
           <TabsContent value="general" className="h-full mt-0">
             <ScrollArea className="h-full">
-              <div className="pr-4">
-                {filteredNews('general').map((item) => (
-                  <NewsCard key={item.id} item={item} />
-                ))}
-              </div>
+              <NewsGrid news={filteredNews('general')} />
             </ScrollArea>
           </TabsContent>
 
           <TabsContent value="crypto" className="h-full mt-0">
             <ScrollArea className="h-full">
-              <div className="pr-4">
-                {filteredNews('crypto').map((item) => (
-                  <NewsCard key={item.id} item={item} />
-                ))}
-              </div>
+              <NewsGrid news={filteredNews('crypto')} />
             </ScrollArea>
           </TabsContent>
 
           <TabsContent value="forex" className="h-full mt-0">
             <ScrollArea className="h-full">
-              <div className="pr-4">
-                {filteredNews('forex').map((item) => (
-                  <NewsCard key={item.id} item={item} />
-                ))}
-              </div>
+              <NewsGrid news={filteredNews('forex')} />
             </ScrollArea>
           </TabsContent>
         </div>
