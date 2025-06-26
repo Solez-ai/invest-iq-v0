@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Moon, Sun, Globe, DollarSign, Bell, Zap } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
@@ -11,15 +12,24 @@ export const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Initialize from localStorage or default to dark
     const savedTheme = localStorage.getItem('theme');
-    const htmlClassList = document.documentElement.classList;
-    return savedTheme === 'dark' || (!savedTheme && htmlClassList.contains('dark'));
+    return savedTheme === 'dark' || (!savedTheme && document.documentElement.classList.contains('dark'));
   });
 
-  // Update theme when user changes it
+  // Only sync with user settings when they are first loaded
   useEffect(() => {
-    const root = document.documentElement;
+    if (!loading && user && settings.theme) {
+      const shouldBeDark = settings.theme === 'dark';
+      setIsDarkMode(shouldBeDark);
+    }
+  }, [settings.theme, loading, user]);
+
+  // Handle theme changes
+  const handleThemeChange = (checked: boolean) => {
+    setIsDarkMode(checked);
     
-    if (isDarkMode) {
+    // Update DOM immediately
+    const root = document.documentElement;
+    if (checked) {
       root.classList.add('dark');
       root.classList.remove('light');
       localStorage.setItem('theme', 'dark');
@@ -29,25 +39,11 @@ export const Settings = () => {
       localStorage.setItem('theme', 'light');
     }
 
-    // Save to database if user is signed in (debounced) - removed saveSettings from dependencies
-    if (user && !loading && !saving) {
-      const timeoutId = setTimeout(() => {
-        saveSettings({ theme: isDarkMode ? 'dark' : 'light' });
-      }, 1000); // Increased timeout to 1 second
-      
-      return () => clearTimeout(timeoutId);
+    // Save to database if user is signed in
+    if (user && !saving) {
+      saveSettings({ theme: checked ? 'dark' : 'light' });
     }
-  }, [isDarkMode, user, loading, saving]); // Removed saveSettings from dependencies
-
-  // Sync with user settings when loaded (only if different from current)
-  useEffect(() => {
-    if (!loading && user && settings.theme) {
-      const shouldBeDark = settings.theme === 'dark';
-      if (isDarkMode !== shouldBeDark) {
-        setIsDarkMode(shouldBeDark);
-      }
-    }
-  }, [settings.theme, loading, user, isDarkMode]);
+  };
 
   const handleCurrencyChange = (currency: string) => {
     if (user && !saving) {
@@ -106,7 +102,7 @@ export const Settings = () => {
             </div>
             <Switch 
               checked={isDarkMode} 
-              onCheckedChange={setIsDarkMode}
+              onCheckedChange={handleThemeChange}
               disabled={saving}
             />
           </div>
