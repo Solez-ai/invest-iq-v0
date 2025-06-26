@@ -20,6 +20,7 @@ export const useUserSettings = () => {
     live_updates: true
   });
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Load user settings from database
   const loadSettings = async () => {
@@ -59,19 +60,54 @@ export const useUserSettings = () => {
       return false;
     }
 
+    if (saving) {
+      console.log('Already saving settings, skipping...');
+      return true;
+    }
+
+    setSaving(true);
     try {
       const updatedSettings = { ...settings, ...newSettings };
       
-      const { error } = await supabase
+      // First try to update existing record
+      const { data: existingData, error: selectError } = await supabase
         .from('user_settings')
-        .upsert({
-          user_id: user.id,
-          theme: updatedSettings.theme,
-          currency: updatedSettings.currency,
-          notifications: updatedSettings.notifications,
-          live_updates: updatedSettings.live_updates,
-          updated_at: new Date().toISOString()
-        });
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (selectError && selectError.code !== 'PGRST116') {
+        throw selectError;
+      }
+
+      let error;
+      if (existingData) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('user_settings')
+          .update({
+            theme: updatedSettings.theme,
+            currency: updatedSettings.currency,
+            notifications: updatedSettings.notifications,
+            live_updates: updatedSettings.live_updates,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+        error = updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('user_settings')
+          .insert({
+            user_id: user.id,
+            theme: updatedSettings.theme,
+            currency: updatedSettings.currency,
+            notifications: updatedSettings.notifications,
+            live_updates: updatedSettings.live_updates,
+            updated_at: new Date().toISOString()
+          });
+        error = insertError;
+      }
 
       if (error) throw error;
       
@@ -82,6 +118,8 @@ export const useUserSettings = () => {
       toast.error('Failed to save settings');
       console.error('Error saving settings:', error);
       return false;
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -102,6 +140,7 @@ export const useUserSettings = () => {
   return {
     settings,
     loading,
+    saving,
     saveSettings,
     loadSettings
   };

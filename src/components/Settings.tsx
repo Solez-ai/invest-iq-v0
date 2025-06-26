@@ -8,9 +8,12 @@ import { useAuth } from '@/hooks/useAuth';
 
 export const Settings = () => {
   const { user } = useAuth();
-  const { settings, loading, saveSettings } = useUserSettings();
+  const { settings, loading, saving, saveSettings } = useUserSettings();
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    return document.documentElement.classList.contains('dark');
+    // Initialize from localStorage or default to dark
+    const savedTheme = localStorage.getItem('theme');
+    const htmlClassList = document.documentElement.classList;
+    return savedTheme === 'dark' || (!savedTheme && htmlClassList.contains('dark'));
   });
 
   // Update theme when user changes it
@@ -27,21 +30,28 @@ export const Settings = () => {
       localStorage.setItem('theme', 'light');
     }
 
-    // Save to database if user is signed in
-    if (user) {
-      saveSettings({ theme: isDarkMode ? 'dark' : 'light' });
+    // Save to database if user is signed in (debounced)
+    if (user && !loading) {
+      const timeoutId = setTimeout(() => {
+        saveSettings({ theme: isDarkMode ? 'dark' : 'light' });
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [isDarkMode, user, saveSettings]);
+  }, [isDarkMode, user, loading, saveSettings]);
 
-  // Sync with user settings when loaded
+  // Sync with user settings when loaded (only if different from current)
   useEffect(() => {
-    if (!loading && user) {
-      setIsDarkMode(settings.theme === 'dark');
+    if (!loading && user && settings.theme) {
+      const shouldBeDark = settings.theme === 'dark';
+      if (isDarkMode !== shouldBeDark) {
+        setIsDarkMode(shouldBeDark);
+      }
     }
-  }, [settings, loading, user]);
+  }, [settings.theme, loading, user]);
 
   const handleCurrencyChange = (currency: string) => {
-    if (user) {
+    if (user && !saving) {
       saveSettings({ currency });
     }
   };
@@ -51,13 +61,13 @@ export const Settings = () => {
     localStorage.setItem('liveUpdates', enabled.toString());
     window.dispatchEvent(new CustomEvent('liveUpdatesChanged', { detail: enabled }));
     
-    if (user) {
+    if (user && !saving) {
       saveSettings({ live_updates: enabled });
     }
   };
 
   const handleNotificationsChange = (enabled: boolean) => {
-    if (user) {
+    if (user && !saving) {
       saveSettings({ notifications: enabled });
     }
   };
@@ -98,6 +108,7 @@ export const Settings = () => {
             <Switch 
               checked={isDarkMode} 
               onCheckedChange={setIsDarkMode}
+              disabled={saving}
             />
           </div>
         </div>
@@ -115,7 +126,11 @@ export const Settings = () => {
             <label className="block text-sm font-medium text-foreground mb-2">
               Primary Currency
             </label>
-            <Select value={settings.currency} onValueChange={handleCurrencyChange}>
+            <Select 
+              value={settings.currency} 
+              onValueChange={handleCurrencyChange}
+              disabled={saving}
+            >
               <SelectTrigger className="w-full bg-background/50 border-border text-foreground hover:bg-background/70 focus:ring-primary">
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
@@ -137,6 +152,7 @@ export const Settings = () => {
             <Switch 
               checked={settings.live_updates} 
               onCheckedChange={handleLiveUpdatesChange}
+              disabled={saving}
             />
           </div>
         </div>
@@ -183,6 +199,7 @@ export const Settings = () => {
             <Switch 
               checked={settings.notifications} 
               onCheckedChange={handleNotificationsChange}
+              disabled={saving}
             />
           </div>
           
