@@ -9,6 +9,7 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
+  [key: string]: any; // Add index signature for Json compatibility
 }
 
 interface ChatHistory {
@@ -37,7 +38,17 @@ export const useAIChatHistory = () => {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      setChatHistory(data || []);
+      
+      // Transform the data to match our interface
+      const transformedData = (data || []).map(item => ({
+        id: item.id,
+        chat_name: item.chat_name,
+        messages: Array.isArray(item.messages) ? item.messages as ChatMessage[] : [],
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      }));
+      
+      setChatHistory(transformedData);
     } catch (error) {
       console.error('Error loading chat history:', error);
     } finally {
@@ -58,7 +69,7 @@ export const useAIChatHistory = () => {
         .insert({
           user_id: user.id,
           chat_name: chatName,
-          messages: messages
+          messages: messages as any // Cast to any for Json compatibility
         });
 
       if (error) throw error;
@@ -81,7 +92,7 @@ export const useAIChatHistory = () => {
       const { error } = await supabase
         .from('user_ai_chats')
         .update({
-          messages: messages,
+          messages: messages as any, // Cast to any for Json compatibility
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)

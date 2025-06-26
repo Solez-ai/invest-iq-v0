@@ -8,7 +8,7 @@ interface DiaryEntry {
   id: string;
   title: string;
   content: string | null;
-  mood: 'bullish' | 'bearish' | 'neutral' | null;
+  mood: string | null; // Changed from strict union to string | null
   tags: string[] | null;
   created_at: string;
   updated_at: string;
