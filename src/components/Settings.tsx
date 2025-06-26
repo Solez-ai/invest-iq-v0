@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Moon, Sun, Globe, DollarSign, Bell, Zap } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
@@ -30,15 +29,15 @@ export const Settings = () => {
       localStorage.setItem('theme', 'light');
     }
 
-    // Save to database if user is signed in (debounced)
-    if (user && !loading) {
+    // Save to database if user is signed in (debounced) - removed saveSettings from dependencies
+    if (user && !loading && !saving) {
       const timeoutId = setTimeout(() => {
         saveSettings({ theme: isDarkMode ? 'dark' : 'light' });
-      }, 300);
+      }, 1000); // Increased timeout to 1 second
       
       return () => clearTimeout(timeoutId);
     }
-  }, [isDarkMode, user, loading, saveSettings]);
+  }, [isDarkMode, user, loading, saving]); // Removed saveSettings from dependencies
 
   // Sync with user settings when loaded (only if different from current)
   useEffect(() => {
@@ -48,7 +47,7 @@ export const Settings = () => {
         setIsDarkMode(shouldBeDark);
       }
     }
-  }, [settings.theme, loading, user]);
+  }, [settings.theme, loading, user, isDarkMode]);
 
   const handleCurrencyChange = (currency: string) => {
     if (user && !saving) {
